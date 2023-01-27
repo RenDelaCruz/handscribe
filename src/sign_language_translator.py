@@ -1,3 +1,4 @@
+from contextlib import suppress
 from typing import Literal
 
 import cv2
@@ -20,10 +21,8 @@ class SignLanguageTranslator:
         )
 
     def start(self) -> None:
-        try:
+        with suppress(KeyboardInterrupt):
             self.capture_video()
-        except KeyboardInterrupt:
-            pass
 
     def capture_video(self) -> None:
         video_capture = cv2.VideoCapture(0)
@@ -48,11 +47,11 @@ class SignLanguageTranslator:
                 if results.multi_hand_landmarks:
                     for hand_landmarks in results.multi_hand_landmarks:
                         mp_drawing.draw_landmarks(
-                            image,
-                            hand_landmarks,
-                            mp_hands.HAND_CONNECTIONS,
-                            mp_drawing_styles.get_default_hand_landmarks_style(),
-                            mp_drawing_styles.get_default_hand_connections_style(),
+                            image=image,
+                            landmark_list=hand_landmarks,
+                            connections=mp_hands.HAND_CONNECTIONS,
+                            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+                            connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
                         )
 
                 # Flip the image horizontally for a selfie-view display.
