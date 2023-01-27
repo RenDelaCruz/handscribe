@@ -1,13 +1,23 @@
 # sign-language-ai-translator
 
-CS 4ZP6
+**CS 4ZP6: Capstone Project**
+Ren de la Cruz
 
-# Start
+## Requirements
 
-Run `make` to see a list of commands.
+This project requires:
+- Python 3.10
+- `poetry` Python package
 
-This project requires the Python 3.10 and the python package `poetry` for package management. Before starting, run:
+To install `poetry`, run:
 
-1. Run `pip install poetry`.
-2. Run `make init` to initialize the project.
-3. Run `make start` to start the project.
+```sh
+pip install poetry
+```
+
+## Start
+
+1. Run `make init` to initialize the project.
+2. Run `make start` to start the project.
+
+> Run `make` to see a list of commands.
