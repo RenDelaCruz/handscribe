@@ -2,6 +2,8 @@ from contextlib import suppress
 from typing import Literal
 
 import cv2
+import numpy as np
+from constants import Colour
 from mediapipe.python.solutions import drawing_styles as mp_drawing_styles
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
@@ -11,7 +13,7 @@ class SignLanguageTranslator:
     def __init__(
         self,
         model_complexity: Literal[0, 1] = 0,
-        min_detection_confidence: float = 0.5,
+        min_detection_confidence: float = 0.65,
         min_tracking_confidence: float = 0.5,
     ) -> None:
         self.hands = mp_hands.Hands(
@@ -45,14 +47,38 @@ class SignLanguageTranslator:
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 if results.multi_hand_landmarks:
-                    for hand_landmarks in results.multi_hand_landmarks:
-                        mp_drawing.draw_landmarks(
-                            image=image,
-                            landmark_list=hand_landmarks,
-                            connections=mp_hands.HAND_CONNECTIONS,
-                            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
-                            connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+                    for hand_landmarks, handedness in zip(
+                        results.multi_hand_landmarks,
+                        results.multi_handedness,
+                        strict=False,
+                    ):
+                        handedness  # TODO: remove
+                        image_height, image_width, _ = image.shape
+
+                        landmark_points = np.empty((0, 2), int)
+                        for landmark in hand_landmarks.landmark:
+                            x = int(landmark.x * image_width)
+                            y = int(landmark.y * image_height)
+                            point = [np.array((x, y))]
+                            landmark_points = np.append(landmark_points, point, axis=0)
+
+                        x, y, w, h = cv2.boundingRect(landmark_points)
+                        padding = 25
+                        cv2.rectangle(
+                            img=image,
+                            pt1=(x - padding, y - padding),
+                            pt2=(w + x + padding, h + y + padding),
+                            color=Colour.GREEN.value,
+                            thickness=2,
                         )
+
+                        # mp_drawing.draw_landmarks(
+                        #     image=image,
+                        #     landmark_list=hand_landmarks,
+                        #     connections=mp_hands.HAND_CONNECTIONS,
+                        #     landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+                        #     connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+                        # )
 
                 # Flip the image horizontally for a selfie-view display.
                 cv2.imshow("Sign Language AI Translator", cv2.flip(image, 1))
