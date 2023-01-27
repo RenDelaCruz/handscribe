@@ -7,8 +7,6 @@ mp_hands = mp.solutions.hands
 
 video_capture = cv2.VideoCapture(0)
 
-a = "Hey {}".format(5)
-
 with mp_hands.Hands(
     model_complexity=0,
     min_detection_confidence=0.5,
