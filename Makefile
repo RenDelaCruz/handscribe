@@ -3,7 +3,7 @@ include .makefile.inc
 ## Starts the project. Use CTRL+C to stop
 .PHONY: start
 start:
-	poetry run python3 main.py
+	poetry run python3 src/main.py
 
 ## Initializes the project by installing packages 
 .PHONY: init
