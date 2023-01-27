@@ -8,7 +8,7 @@ RESET  := $(shell tput -Txterm sgr0)
 ## Show help
 help:
 	@printf "\n\n";
-	clear
+	@clear
 	@printf "Usage:\n";
 	@printf "${YELLOW}make${RESET} ${GREEN}<target>${RESET}\n\n";
 

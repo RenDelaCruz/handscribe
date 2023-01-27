@@ -5,7 +5,7 @@ start:
 	poetry run python3 main.py
 
 ## Initializes the project by installing packages 
-install:
+init:
 	poetry install
 
 ## Development
@@ -24,16 +24,16 @@ lint:
 
 ## Packages
 
-## Adds a package to the project. Usage: make add [dev] <package>
-add:
+## Adds a package to the project. Usage: make install [dev] <package>
+install:
 ifeq ($(filter dev, $(MAKECMDGOALS)),)
 	poetry add $(word 2, $(MAKECMDGOALS))
 else
 	poetry add --group dev $(word 3, $(MAKECMDGOALS))
 endif
 
-## Deletes a package from the project. Usage: make remove <package>
-remove:
+## Deletes a package from the project. Usage: make uninstall <package>
+uninstall:
 	poetry remove $(word 2, $(MAKECMDGOALS))
 
 ## Other
