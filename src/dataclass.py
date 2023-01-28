@@ -7,5 +7,3 @@ class BoundingBox:
     y: int
     x2: int
     y2: int
-    width: int
-    height: int

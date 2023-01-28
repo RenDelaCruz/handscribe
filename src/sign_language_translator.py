@@ -66,9 +66,7 @@ class SignLanguageTranslator:
                         )
 
                         self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
-                        self.draw_bounding_rectangle(
-                            image=image, bounding_box=bounding_box
-                        )
+                        self.draw_bounding_box(image=image, bounding_box=bounding_box)
                         self.draw_label(
                             image=image,
                             text=handedness.classification[0].label,
@@ -101,13 +99,9 @@ class SignLanguageTranslator:
             y=y - self.padding,
             x2=width + x + self.padding,
             y2=height + y + self.padding,
-            width=width + self.padding * 2,
-            height=height + self.padding * 2,
         )
 
-    def draw_bounding_rectangle(
-        self, image: np.ndarray, bounding_box: BoundingBox
-    ) -> None:
+    def draw_bounding_box(self, image: np.ndarray, bounding_box: BoundingBox) -> None:
         if not self.show_bounding_box:
             return
 
@@ -133,31 +127,65 @@ class SignLanguageTranslator:
             connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
         )
 
-    def draw_label(
-        self, image: np.ndarray, text: str, bounding_box: BoundingBox
+    def draw_text(
+        self,
+        image: np.ndarray,
+        text: str,
+        position: tuple[int, int],
+        padding: int = 5,
+        font: int = cv2.FONT_HERSHEY_SIMPLEX,
+        font_scale: float = 1.0,
+        font_thickness: int = 1,
+        text_colour: Colour = Colour.WHITE,
+        background_colour: Colour = Colour.BLACK,
     ) -> None:
-        text_width = len(text) * 15
-        point_x = (
-            bounding_box.x
-            if self.show_bounding_box
-            # Centre the label if no box
-            else (bounding_box.x2 + bounding_box.x - text_width) // 2
+        x, y = position
+        horizontal_padding = padding - 4
+        text_size, _ = cv2.getTextSize(
+            text=text, fontFace=font, fontScale=font_scale, thickness=font_thickness
         )
-        point_y = bounding_box.y
+        text_width, text_height = text_size
 
         cv2.rectangle(
             img=image,
-            pt1=(point_x - 2, point_y - 2),
-            pt2=(point_x + text_width, point_y - 30),
-            color=Colour.BLACK.value,
+            pt1=position,
+            pt2=(
+                x + text_width + (horizontal_padding * 2),
+                y + text_height + (padding * 2) - 1,
+            ),
+            color=background_colour.value,
             thickness=-1,
         )
         cv2.putText(
             img=image,
+            text=text,
+            org=(
+                x + horizontal_padding + 1,
+                y + text_height + padding - 1,
+            ),
+            fontFace=font,
+            fontScale=font_scale,
+            color=text_colour.value,
+            thickness=font_thickness,
+        )
+
+    def draw_label(
+        self, image: np.ndarray, text: str, bounding_box: BoundingBox
+    ) -> None:
+        point_x = (
+            bounding_box.x
+            if self.show_bounding_box
+            # Centre the label if no box
+            else (bounding_box.x2 + bounding_box.x - (len(text) * 15)) // 2
+        )
+        point_y = bounding_box.y
+
+        self.draw_text(
+            image=image,
             text=text.upper(),
-            org=(point_x, point_y - 7),
-            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=0.8,
-            color=Colour.WHITE.value,
-            thickness=2,
+            position=(point_x - 1, point_y - 29),
+            font_scale=0.8,
+            font_thickness=2,
+            text_colour=Colour.WHITE,
+            background_colour=Colour.BLACK,
         )
