@@ -4,23 +4,33 @@ from typing import Literal
 import cv2
 import numpy as np
 from constants import Colour
+from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
+from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_styles as mp_drawing_styles
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
+
+from dataclass import BoundingRectangle
 
 
 class SignLanguageTranslator:
     def __init__(
         self,
         model_complexity: Literal[0, 1] = 0,
-        min_detection_confidence: float = 0.65,
+        min_detection_confidence: float = 0.5,
         min_tracking_confidence: float = 0.5,
+        show_landmarks: bool = True,
+        show_bounding_rectangle: bool = True,
+        bounding_rectangle_padding: int = 20,
     ) -> None:
         self.hands = mp_hands.Hands(
             model_complexity=model_complexity,
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
+        self.show_landmarks = show_landmarks
+        self.show_bounding_rectangle = show_bounding_rectangle
+        self.padding = bounding_rectangle_padding
 
     def start(self) -> None:
         with suppress(KeyboardInterrupt):
@@ -34,16 +44,16 @@ class SignLanguageTranslator:
                 success, image = video_capture.read()
                 if not success:
                     print("Ignoring empty camera frame.")
-                    # If loading a video, use 'break' instead of 'continue'.
+                    # If loading a video, use 'break' instead of 'continue'
                     continue
 
                 # To improve performance, optionally mark the image as not writeable to
-                # pass by reference.
+                # pass by reference
                 image.flags.writeable = False
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 results = hands.process(image)
 
-                # Draw the hand annotations on the image.
+                # Draw the hand annotations on the image
                 image.flags.writeable = True
                 image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
                 if results.multi_hand_landmarks:
@@ -53,36 +63,68 @@ class SignLanguageTranslator:
                         strict=False,
                     ):
                         handedness  # TODO: remove
-                        image_height, image_width, _ = image.shape
 
-                        landmark_points = np.empty((0, 2), int)
-                        for landmark in hand_landmarks.landmark:
-                            x = int(landmark.x * image_width)
-                            y = int(landmark.y * image_height)
-                            point = [np.array((x, y))]
-                            landmark_points = np.append(landmark_points, point, axis=0)
-
-                        x, y, w, h = cv2.boundingRect(landmark_points)
-                        padding = 25
-                        cv2.rectangle(
-                            img=image,
-                            pt1=(x - padding, y - padding),
-                            pt2=(w + x + padding, h + y + padding),
-                            color=Colour.GREEN.value,
-                            thickness=2,
+                        bounding_rectangle = self.get_bounding_rectangle(
+                            image=image, landmarks=hand_landmarks.landmark
                         )
 
-                        # mp_drawing.draw_landmarks(
-                        #     image=image,
-                        #     landmark_list=hand_landmarks,
-                        #     connections=mp_hands.HAND_CONNECTIONS,
-                        #     landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
-                        #     connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
-                        # )
+                        self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
+                        self.draw_bounding_rectangle(
+                            image=image, bounding_rectangle=bounding_rectangle
+                        )
 
-                # Flip the image horizontally for a selfie-view display.
+                # Flip the image horizontally for a selfie-view display
                 cv2.imshow("Sign Language AI Translator", cv2.flip(image, 1))
                 if cv2.waitKey(5) & 0xFF == 27:
                     break
 
         video_capture.release()
+
+    def get_bounding_rectangle(
+        self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
+    ) -> BoundingRectangle:
+        image_height, image_width, _ = image.shape
+
+        landmark_points = np.empty((0, 2), int)
+        for landmark in landmarks:
+            x = int(landmark.x * image_width)
+            y = int(landmark.y * image_height)
+            point = [np.array((x, y))]
+            landmark_points = np.append(landmark_points, point, axis=0)
+
+        x, y, width, height = cv2.boundingRect(landmark_points)
+
+        return BoundingRectangle(
+            x=x - self.padding,
+            y=y - self.padding,
+            width=width + x + self.padding,
+            height=height + y + self.padding,
+        )
+
+    def draw_bounding_rectangle(
+        self, image: np.ndarray, bounding_rectangle: BoundingRectangle
+    ) -> None:
+        if not self.show_bounding_rectangle:
+            return
+
+        cv2.rectangle(
+            img=image,
+            pt1=(bounding_rectangle.x, bounding_rectangle.y),
+            pt2=(bounding_rectangle.width, bounding_rectangle.height),
+            color=Colour.CYAN.value,
+            thickness=2,
+        )
+
+    def draw_landmarks(
+        self, image: np.ndarray, hand_landmarks: NormalizedLandmarkList
+    ) -> None:
+        if not self.show_landmarks:
+            return
+
+        mp_drawing.draw_landmarks(
+            image=image,
+            landmark_list=hand_landmarks,
+            connections=mp_hands.HAND_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+            connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+        )

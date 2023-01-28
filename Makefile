@@ -27,6 +27,13 @@ type_check:
 lint:
 	poetry run ruff . --fix
 
+## Runs all the above formatters
+.PHONY: fix
+fix:
+	$(MAKE) format
+	$(MAKE) type_check
+	$(MAKE) lint
+
 ## Packages
 
 ## Adds a package or dev dependency to the project. Usage: make install [dev] <package>
