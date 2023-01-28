@@ -120,7 +120,7 @@ class SignLanguageTranslator:
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
-            connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+            # connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
         )
 
     def draw_text(
