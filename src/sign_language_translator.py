@@ -4,24 +4,23 @@ from typing import Literal
 import cv2
 import numpy as np
 from constants import Colour
+from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_styles as mp_drawing_styles
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 
-from dataclass import BoundingRectangle
-
 
 class SignLanguageTranslator:
     def __init__(
         self,
         model_complexity: Literal[0, 1] = 0,
-        min_detection_confidence: float = 0.5,
+        min_detection_confidence: float = 0.75,
         min_tracking_confidence: float = 0.5,
         show_landmarks: bool = True,
         show_bounding_rectangle: bool = True,
-        bounding_rectangle_padding: int = 20,
+        bounding_rectangle_padding: int = 30,
     ) -> None:
         self.hands = mp_hands.Hands(
             model_complexity=model_complexity,
@@ -50,7 +49,7 @@ class SignLanguageTranslator:
                 # To improve performance, optionally mark the image as not writeable to
                 # pass by reference
                 image.flags.writeable = False
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
                 results = hands.process(image)
 
                 # Draw the hand annotations on the image
@@ -62,27 +61,30 @@ class SignLanguageTranslator:
                         results.multi_handedness,
                         strict=False,
                     ):
-                        handedness  # TODO: remove
-
-                        bounding_rectangle = self.get_bounding_rectangle(
+                        bounding_box = self.get_bounding_box(
                             image=image, landmarks=hand_landmarks.landmark
                         )
 
                         self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
                         self.draw_bounding_rectangle(
-                            image=image, bounding_rectangle=bounding_rectangle
+                            image=image, bounding_box=bounding_box
+                        )
+                        self.draw_label(
+                            image=image,
+                            text=handedness.classification[0].label,
+                            bounding_box=bounding_box,
                         )
 
                 # Flip the image horizontally for a selfie-view display
-                cv2.imshow("Sign Language AI Translator", cv2.flip(image, 1))
+                cv2.imshow("Sign Language AI Translator", image)
                 if cv2.waitKey(5) & 0xFF == 27:
                     break
 
         video_capture.release()
 
-    def get_bounding_rectangle(
+    def get_bounding_box(
         self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
-    ) -> BoundingRectangle:
+    ) -> BoundingBox:
         image_height, image_width, _ = image.shape
 
         landmark_points = np.empty((0, 2), int)
@@ -94,7 +96,7 @@ class SignLanguageTranslator:
 
         x, y, width, height = cv2.boundingRect(landmark_points)
 
-        return BoundingRectangle(
+        return BoundingBox(
             x=x - self.padding,
             y=y - self.padding,
             width=width + x + self.padding,
@@ -102,15 +104,15 @@ class SignLanguageTranslator:
         )
 
     def draw_bounding_rectangle(
-        self, image: np.ndarray, bounding_rectangle: BoundingRectangle
+        self, image: np.ndarray, bounding_box: BoundingBox
     ) -> None:
         if not self.show_bounding_rectangle:
             return
 
         cv2.rectangle(
             img=image,
-            pt1=(bounding_rectangle.x, bounding_rectangle.y),
-            pt2=(bounding_rectangle.width, bounding_rectangle.height),
+            pt1=(bounding_box.x, bounding_box.y),
+            pt2=(bounding_box.width, bounding_box.height),
             color=Colour.CYAN.value,
             thickness=2,
         )
@@ -127,4 +129,24 @@ class SignLanguageTranslator:
             connections=mp_hands.HAND_CONNECTIONS,
             landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
             connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+        )
+
+    def draw_label(
+        self, image: np.ndarray, text: str, bounding_box: BoundingBox
+    ) -> None:
+        cv2.rectangle(
+            img=image,
+            pt1=(bounding_box.x - 2, bounding_box.y - 2),
+            pt2=(bounding_box.x + len(text) * 15, bounding_box.y - 30),
+            color=Colour.BLACK.value,
+            thickness=-1,
+        )
+        cv2.putText(
+            img=image,
+            text=text.upper(),
+            org=(bounding_box.x, bounding_box.y - 7),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.8,
+            color=Colour.WHITE.value,
+            thickness=2,
         )
