@@ -5,5 +5,7 @@ from dataclasses import dataclass
 class BoundingBox:
     x: int
     y: int
+    x2: int
+    y2: int
     width: int
     height: int

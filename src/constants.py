@@ -10,3 +10,4 @@ class Colour(Enum):
     GREEN: Final[BGR] = (0, 255, 0)
     YELLOW: Final[BGR] = (0, 255, 255)
     CYAN: Final[BGR] = (255, 255, 0)
+    ORANGE: Final[BGR] = (0, 165, 255)
