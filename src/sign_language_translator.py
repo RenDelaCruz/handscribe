@@ -42,12 +42,9 @@ class SignLanguageTranslator:
             while video_capture.isOpened():
                 success, image = video_capture.read()
                 if not success:
-                    print("Ignoring empty camera frame.")
-                    # If loading a video, use 'break' instead of 'continue'
-                    continue
+                    break
 
-                # To improve performance, optionally mark the image as not writeable to
-                # pass by reference
+                # To improve performance, set as not writeable to pass by reference
                 image.flags.writeable = False
                 image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
                 results = hands.process(image)
@@ -73,7 +70,6 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
-                # Flip the image horizontally for a selfie-view display
                 cv2.imshow("Sign Language AI Translator", image)
                 if cv2.waitKey(5) & 0xFF == 27:
                     break
