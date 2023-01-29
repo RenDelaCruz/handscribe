@@ -3,7 +3,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Colour, LandmarkPoint
+from constants import Colour
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
@@ -117,20 +117,21 @@ class SignLanguageTranslator:
         if not self.show_landmarks:
             return
 
-        hand_landmark_style: dict[LandmarkPoint, mp_drawing_styles.DrawingSpec] = {}
-        for point in LandmarkPoint:
-            hand_landmark_style[point] = mp_drawing_styles.DrawingSpec(
-                color=Colour.TEAL.value,
-                thickness=-1,
-                circle_radius=6,
-            )
+        # from constants import LandmarkPoint
+        # hand_landmark_style: dict[LandmarkPoint, mp_drawing_styles.DrawingSpec] = {}
+        # for point in LandmarkPoint:
+        #     hand_landmark_style[point] = mp_drawing_styles.DrawingSpec(
+        #         color=Colour.TEAL.value,
+        #         thickness=-1,
+        #         circle_radius=6,
+        #     )
 
         mp_drawing.draw_landmarks(
             image=image,
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
-            landmark_drawing_spec=hand_landmark_style,
-            # mp_drawing_styles.get_default_hand_landmarks_style(),
+            # landmark_drawing_spec=hand_landmark_style,
+            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
             # connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
         )
 
