@@ -3,7 +3,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Colour
+from constants import Colour, LandmarkPoint
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
@@ -15,14 +15,16 @@ from mediapipe.python.solutions import hands as mp_hands
 class SignLanguageTranslator:
     def __init__(
         self,
-        model_complexity: Literal[0, 1] = 0,
-        min_detection_confidence: float = 0.75,
+        max_num_hands: int = 4,
+        model_complexity: Literal[0, 1] = 1,
+        min_detection_confidence: float = 0.5,
         min_tracking_confidence: float = 0.5,
         show_landmarks: bool = True,
         show_bounding_box: bool = True,
         bounding_box_padding: int = 30,
     ) -> None:
         self.hands = mp_hands.Hands(
+            max_num_hands=max_num_hands,
             model_complexity=model_complexity,
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
@@ -115,11 +117,20 @@ class SignLanguageTranslator:
         if not self.show_landmarks:
             return
 
+        hand_landmark_style: dict[LandmarkPoint, mp_drawing_styles.DrawingSpec] = {}
+        for point in LandmarkPoint:
+            hand_landmark_style[point] = mp_drawing_styles.DrawingSpec(
+                color=Colour.TEAL.value,
+                thickness=-1,
+                circle_radius=6,
+            )
+
         mp_drawing.draw_landmarks(
             image=image,
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
-            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
+            landmark_drawing_spec=hand_landmark_style,
+            # mp_drawing_styles.get_default_hand_landmarks_style(),
             # connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
         )
 
@@ -182,6 +193,6 @@ class SignLanguageTranslator:
             position=(point_x - 1, point_y - 29),
             font_scale=0.8,
             font_thickness=2,
-            text_colour=Colour.WHITE,
-            background_colour=Colour.BLACK,
+            text_colour=Colour.BLACK,
+            background_colour=Colour.CYAN,
         )
