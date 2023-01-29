@@ -66,7 +66,7 @@ class SignLanguageTranslator:
 
                         self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
                         self.draw_bounding_box(image=image, bounding_box=bounding_box)
-                        self.draw_label(
+                        self.draw_bounding_box_label(
                             image=image,
                             text=handedness.classification[0].label,
                             bounding_box=bounding_box,
@@ -102,6 +102,21 @@ class SignLanguageTranslator:
     def draw_bounding_box(self, image: np.ndarray, bounding_box: BoundingBox) -> None:
         if not self.show_bounding_box:
             return
+
+        # cv2.circle(
+        #     image,
+        #     (
+        #         (bounding_box.x + bounding_box.x2) // 2,
+        #         (bounding_box.y + bounding_box.y2) // 2,
+        #     ),
+        #     max(
+        #         bounding_box.y2 - bounding_box.y,
+        #         bounding_box.x2 - bounding_box.x,
+        #     )
+        #     // 2 + self.padding,
+        #     Colour.CYAN.value,
+        #     2,
+        # )
 
         cv2.rectangle(
             img=image,
@@ -177,7 +192,7 @@ class SignLanguageTranslator:
             thickness=font_thickness,
         )
 
-    def draw_label(
+    def draw_bounding_box_label(
         self, image: np.ndarray, text: str, bounding_box: BoundingBox
     ) -> None:
         point_x = (
