@@ -116,6 +116,7 @@ class SignLanguageTranslator:
         #     Colour.CYAN.value,
         #     2,
         # )
+        # return
 
         cv2.rectangle(
             img=image,
@@ -151,7 +152,6 @@ class SignLanguageTranslator:
         background_colour: Colour = Colour.BLACK,
     ) -> None:
         x, y = position
-        horizontal_padding = padding - 4
         text_size, _ = cv2.getTextSize(
             text=text, fontFace=font, fontScale=font_scale, thickness=font_thickness
         )
@@ -161,7 +161,7 @@ class SignLanguageTranslator:
             img=image,
             pt1=position,
             pt2=(
-                x + text_width + (horizontal_padding * 2),
+                x + text_width + (padding * 2),
                 y + text_height + (padding * 2) - 1,
             ),
             color=background_colour.value,
@@ -171,13 +171,14 @@ class SignLanguageTranslator:
             img=image,
             text=text,
             org=(
-                x + horizontal_padding + 1,
+                x + padding + 1,
                 y + text_height + padding - 1,
             ),
             fontFace=font,
             fontScale=font_scale,
             color=text_colour.value,
             thickness=font_thickness,
+            lineType=cv2.LINE_AA,
         )
 
     def draw_bounding_box_label(
@@ -194,9 +195,9 @@ class SignLanguageTranslator:
         self.draw_text(
             image=image,
             text=text.upper(),
-            position=(point_x - 1, point_y - 29),
-            font_scale=0.8,
-            font_thickness=2,
+            position=(point_x - 1, point_y - 25),
+            font_scale=0.65,
+            font_thickness=1,
             text_colour=Colour.BLACK,
             background_colour=Colour.CYAN,
         )
