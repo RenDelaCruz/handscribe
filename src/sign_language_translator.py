@@ -3,11 +3,10 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Colour
+from constants import Colour, hand_landmark_style
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
-from mediapipe.python.solutions import drawing_styles as mp_drawing_styles
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 
@@ -132,22 +131,11 @@ class SignLanguageTranslator:
         if not self.show_landmarks:
             return
 
-        # from constants import LandmarkPoint
-        # hand_landmark_style: dict[LandmarkPoint, mp_drawing_styles.DrawingSpec] = {}
-        # for point in LandmarkPoint:
-        #     hand_landmark_style[point] = mp_drawing_styles.DrawingSpec(
-        #         color=Colour.TEAL.value,
-        #         thickness=-1,
-        #         circle_radius=6,
-        #     )
-
         mp_drawing.draw_landmarks(
             image=image,
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
-            # landmark_drawing_spec=hand_landmark_style,
-            landmark_drawing_spec=mp_drawing_styles.get_default_hand_landmarks_style(),
-            # connection_drawing_spec=mp_drawing_styles.get_default_hand_connections_style(),
+            landmark_drawing_spec=hand_landmark_style,
         )
 
     def draw_text(
