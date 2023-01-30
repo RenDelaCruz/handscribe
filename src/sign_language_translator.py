@@ -3,7 +3,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Colour, hand_landmark_style
+from constants import Colour, HAND_LANDMARK_STYLE
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
@@ -136,7 +136,7 @@ class SignLanguageTranslator:
             image=image,
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
-            landmark_drawing_spec=hand_landmark_style,
+            landmark_drawing_spec=HAND_LANDMARK_STYLE,
         )
 
     def draw_text(
