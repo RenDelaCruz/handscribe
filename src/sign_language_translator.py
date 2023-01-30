@@ -16,7 +16,7 @@ class SignLanguageTranslator:
         self,
         max_num_hands: int = 4,
         model_complexity: Literal[0, 1] = 1,
-        min_detection_confidence: float = 0.5,
+        min_detection_confidence: float = 0.75,
         min_tracking_confidence: float = 0.5,
         show_landmarks: bool = True,
         show_bounding_box: bool = True,
