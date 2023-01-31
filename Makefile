@@ -1,6 +1,6 @@
 include .makefile.inc
 
-## Starts the project. Use CTRL+C to stop
+## Starts the project. Use ESC in the app or CTRL+C in the terminal to stop
 .PHONY: start
 start:
 	poetry run python3 src/main.py

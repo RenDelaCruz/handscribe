@@ -16,93 +16,23 @@ import customtkinter
 import os
 from PIL import Image
 
+from tkinter import Label, Tk
 
-# class App(customtkinter.CTk):
-#     def __init__(self):
-#         super().__init__()
-
-#         self.title("image_example.py")
-#         self.geometry("700x450")
-
-#         # set grid layout 1x2
-#         self.grid_rowconfigure(0, weight=1)
-#         self.grid_columnconfigure(1, weight=1)
-
-#         # load images with light and dark mode image
-#         cap = cv2.VideoCapture(0)
-#         cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-#         img = Image.fromarray(cv2image)
-
-#         self.large_test_image = customtkinter.CTkImage(img, size=(50, 50))
-
-#         # create navigation frame
-#         self.navigation_frame = customtkinter.CTkFrame(self, corner_radius=0)
-#         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-#         self.navigation_frame.grid_rowconfigure(4, weight=1)
+import cv2
+from PIL import Image, ImageTk
+from sign_language_translator import SignLanguageTranslator
+import customtkinter
 
 
-#         self.appearance_mode_menu = customtkinter.CTkOptionMenu(self.navigation_frame, values=["Light", "Dark", "System"],
-#                                                                 command=self.change_appearance_mode_event)
-#         self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
+class GUI(customtkinter.CTk):
+    home_frame: customtkinter.CTkFrame
 
-#         # create home frame
-#         self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-#         self.home_frame.grid_columnconfigure(0, weight=1)
-
-#         self.home_frame_large_image_label = customtkinter.CTkLabel(self.home_frame, text="", image=self.large_test_image)
-#         self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
-
-#         # create second frame
-#         self.second_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-
-#         # create third frame
-#         self.third_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-
-#         # select default frame
-#         self.select_frame_by_name("home")
-
-#     def select_frame_by_name(self, name):
-#         # set button color for selected button
-#         # show selected frame
-#         if name == "home":
-#             self.home_frame.grid(row=0, column=1, sticky="nsew")
-#         else:
-#             self.home_frame.grid_forget()
-#         if name == "frame_2":
-#             self.second_frame.grid(row=0, column=1, sticky="nsew")
-#         else:
-#             self.second_frame.grid_forget()
-#         if name == "frame_3":
-#             self.third_frame.grid(row=0, column=1, sticky="nsew")
-#         else:
-#             self.third_frame.grid_forget()
-
-#     def home_button_event(self):
-#         self.select_frame_by_name("home")
-
-#     def frame_2_button_event(self):
-#         self.select_frame_by_name("frame_2")
-
-#     def frame_3_button_event(self):
-#         self.select_frame_by_name("frame_3")
-
-#     def change_appearance_mode_event(self, new_appearance_mode):
-#         customtkinter.set_appearance_mode(new_appearance_mode)
-
-
-# if __name__ == "__main__":
-#     app = App()
-#     app.mainloop()
-
-cap = cv2.VideoCapture(0)
-
-
-class App(customtkinter.CTk):
     def __init__(self) -> None:
         super().__init__()
+        self.bind("<Escape>", lambda _: app.quit())
 
         # configure window
-        self.title("CustomTkinter complex_example.py")
+        self.title("Sign Language AI Translator")
         self.geometry(f"{1100}x{580}")
 
         # configure grid layout (1x2)
@@ -115,7 +45,7 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(
             self.sidebar_frame,
-            text="CustomTkinter",
+            text="ASL Translator",
             font=customtkinter.CTkFont(size=20, weight="bold"),
         )
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -156,11 +86,12 @@ class App(customtkinter.CTk):
             self, corner_radius=0, fg_color="transparent"
         )
         self.home_frame.grid_columnconfigure(0, weight=1)
-        self.home_frame_large_image_label = customtkinter.CTkLabel(
-            self.home_frame, text=""
-        )
-        self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
         self.home_frame.grid(row=0, column=1, sticky="nsew")
+        # self.home_frame_large_image_label = customtkinter.CTkLabel(
+        #     self.home_frame, text=""
+        # )
+        # self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
+        # self.home_frame.grid(row=0, column=1, sticky="nsew")
 
         # self.home_frame_large_image_label = customtkinter.CTkLabel(self.home_frame, text="", image=self.large_test_image)
 
@@ -188,14 +119,14 @@ class App(customtkinter.CTk):
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
 
-    def show_frames(self):
-        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        img = Image.fromarray(cv2image)
+    # def show_frames(self):
+    #     cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+    #     img = Image.fromarray(cv2image)
 
-        self.large_test_image = customtkinter.CTkImage(img, size=img.size)
-        # create home frame
-        self.home_frame_large_image_label.imgtk = self.large_test_image
-        self.home_frame_large_image_label.configure(image=self.large_test_image)
+    #     self.large_test_image = customtkinter.CTkImage(img, size=img.size)
+    #     # create home frame
+    #     self.home_frame_large_image_label.imgtk = self.large_test_image
+    #     self.home_frame_large_image_label.configure(image=self.large_test_image)
 
     def open_input_dialog_event(self) -> None:
         dialog = customtkinter.CTkInputDialog(
@@ -212,6 +143,38 @@ class App(customtkinter.CTk):
 
     def sidebar_button_event(self) -> None:
         print("sidebar_button click")
+
+
+if __name__ == "__main__":
+    video_capture = cv2.VideoCapture(0)
+
+    app = GUI()
+
+    widget = customtkinter.CTkLabel(app.home_frame, text="")
+    widget.pack()
+
+    def open_camera() -> None:
+        _, frame = video_capture.read()
+
+        opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+
+        captured_image = Image.fromarray(opencv_image)
+        photo_image = customtkinter.CTkImage(captured_image, size=captured_image.size)
+        widget.photo_image = photo_image
+        widget.configure(image=photo_image)
+
+        widget.after(100, open_camera)
+
+    open_camera()
+    app.mainloop()
+
+    video_capture.release()
+
+    # translator = SignLanguageTranslator(
+    #     show_landmarks=True,
+    #     show_bounding_box=True,
+    # )
+    # translator.start()
 
 
 if __name__ == "__main__":

@@ -49,8 +49,10 @@ for point in LandmarkPoint:
     HAND_LANDMARK_STYLE[point] = DrawingSpec(
         color=(
             b,
-            g - point.value * 6 if point.value < 5 else g - point.value * 11,
-            r if g - point.value * 7 > 100 else point.value * 9,
+            g - point.value * 6
+            if point.value < LandmarkPoint.INDEX_FINGER_MCP
+            else g - point.value * 11,
+            r if point < LandmarkPoint.RING_FINGER_MCP else point.value * 9,
         ),
         thickness=3,
         circle_radius=4,

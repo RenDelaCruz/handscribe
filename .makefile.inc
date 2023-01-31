@@ -28,7 +28,7 @@ help:
 				} \
 			} else if ($$0 ~ /^##/) { \
 				if (message) { \
-					message = message"\n                     "substr($$0, 4); \
+					message = sprintf("%s\n                     \t%s", message, substr($$0, 4)); \
 				} else { \
 					message = substr($$0, 4); \
 				} \
