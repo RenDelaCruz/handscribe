@@ -1,4 +1,4 @@
-# sign-language-ai-translator  <!-- omit from toc -->
+# Sign Language AI Translator  <!-- omit from toc -->
  
 - [Introduction](#introduction)
 - [Start](#start)

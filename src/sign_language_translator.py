@@ -3,7 +3,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Colour, HAND_LANDMARK_STYLE
+from constants import HAND_LANDMARK_STYLE, Colour
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
