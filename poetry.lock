@@ -80,34 +80,12 @@ test = ["Pillow", "matplotlib", "pytest"]
 test-no-images = ["pytest"]
 
 [[package]]
-name = "customtkinter"
-version = "5.0.5"
-description = "Create modern looking GUIs with Python"
-category = "main"
-optional = false
-python-versions = ">=3.7"
-
-[package.dependencies]
-darkdetect = "*"
-
-[[package]]
 name = "cycler"
 version = "0.11.0"
 description = "Composable style cycles"
 category = "main"
 optional = false
 python-versions = ">=3.6"
-
-[[package]]
-name = "darkdetect"
-version = "0.8.0"
-description = "Detect OS Dark Mode from Python"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.extras]
-macos-listener = ["pyobjc-framework-Cocoa"]
 
 [[package]]
 name = "flatbuffers"
@@ -389,7 +367,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "00033bf19ef98f5b08fc81f8d0e16c5dea0aa93a83b060d52b7a16d2a4497d8a"
+content-hash = "9c9953e4ba8269f4bedbb38c89aa02a2c9de1e4af57b05e9f862850e5a90ecea"
 
 [metadata.files]
 absl-py = [
@@ -479,17 +457,9 @@ contourpy = [
     {file = "contourpy-1.0.7-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:64757f6460fc55d7e16ed4f1de193f362104285c667c112b50a804d482777edd"},
     {file = "contourpy-1.0.7.tar.gz", hash = "sha256:d8165a088d31798b59e91117d1f5fc3df8168d8b48c4acc10fc0df0d0bdbcc5e"},
 ]
-customtkinter = [
-    {file = "customtkinter-5.0.5-py3-none-any.whl", hash = "sha256:55980ce0fa8dc1bbe62959d417b98e32b135e258bba992449f9a57e237f019d0"},
-    {file = "customtkinter-5.0.5.tar.gz", hash = "sha256:e0928ed969de45c4734905969c56a55c7183173732def50ee57f3326b14c803a"},
-]
 cycler = [
     {file = "cycler-0.11.0-py3-none-any.whl", hash = "sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3"},
     {file = "cycler-0.11.0.tar.gz", hash = "sha256:9c87405839a19696e837b3b818fed3f5f69f16f1eec1a1ad77e043dcea9c772f"},
-]
-darkdetect = [
-    {file = "darkdetect-0.8.0-py3-none-any.whl", hash = "sha256:a7509ccf517eaad92b31c214f593dbcf138ea8a43b2935406bbd565e15527a85"},
-    {file = "darkdetect-0.8.0.tar.gz", hash = "sha256:b5428e1170263eb5dea44c25dc3895edd75e6f52300986353cd63533fe7df8b1"},
 ]
 flatbuffers = [
     {file = "flatbuffers-23.1.21-py2.py3-none-any.whl", hash = "sha256:2e4101b291b14f21e87ea20b7bf7127b11563f6084e352d2d708bddd545c9265"},
