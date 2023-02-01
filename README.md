@@ -1,5 +1,15 @@
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) 
+![OpenCV](https://img.shields.io/badge/opencv-%23white.svg?style=for-the-badge&logo=opencv&logoColor=white)
+![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)  
+[![python 3.10](https://img.shields.io/badge/Python-3.10-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![mypy](https://img.shields.io/badge/type_checker-mypy-teal.svg)](http://mypy-lang.org/)
+[![ruff](https://img.shields.io/badge/linter-ruff-red.svg)](http://mypy-lang.org/)
+
+
 # Sign Language Alphabet Translator  <!-- omit from toc -->
- 
+
+
 - [Introduction](#introduction)
 - [Start](#start)
   - [Environment Setup](#environment-setup)
@@ -7,8 +17,6 @@
 
 ## Introduction
 
-**CS 4ZP6: Capstone Project**  
-Ren de la Cruz
 
 ## Start
 
@@ -26,33 +34,7 @@ $ pip install poetry
 
 ### Running the Project
 
-1. Run `make init` to initialize the project.
+1. Run `make init` to initialize the project by downloading all dependencies.
 2. Run `make start` to start the project.
 
-#### Commands
-
-> Run `make` to see a list of all commands.
-
-```makefile
-Usage:
-make <target>
-
-Targets:
-start                Starts the project. Use ESC in the app or CTRL+C in the terminal to stop
-init                 Initializes the project by installing packages 
-
-[Development]
-format               Formats the code using black
-type_check           Type checks the project with mypy
-lint                 Auto-lints the code using ruff
-fix                  Runs all the above formatters
-
-[Packages]
-install              Adds a package or dev dependency to the project. Usage: make install [dev] <package>
-uninstall            Deletes a package from the project. Usage: make uninstall <package>
-
-[Other]
-activate             Activates virtual environment
-deactivate           Deactivates virtual environment
-help                 Show help
-```
+> Run `make` to see a list of other commands.
