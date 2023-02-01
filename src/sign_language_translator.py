@@ -71,11 +71,32 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
+                # Draw metrics to screen
+                messages = (
+                    "Toggle Landmarks: Press 1",
+                    "Toggle Bounding Box: Press 2",
+                    f"Hands Detected: {len(results.multi_hand_landmarks) if results.multi_hand_landmarks else 0}",
+                    "ESC to quit",
+                )
+                for y, text in enumerate(messages, start=1):
+                    self.draw_text(
+                        image=image,
+                        text=text,
+                        position=(25, y * 25),
+                        font_scale=0.5,
+                    )
+
                 cv2.imshow("Sign Language AI Translator", image)
-                if cv2.waitKey(5) & 0xFF == 27:
-                    break
+                match cv2.waitKey(5) & 0xFF:
+                    case 49:  # Press 1
+                        self.show_landmarks ^= True
+                    case 50:  # Press 2
+                        self.show_bounding_box ^= True
+                    case 27:  # Press ESC
+                        break
 
         video_capture.release()
+        cv2.destroyAllWindows()
 
     def get_bounding_box(
         self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
