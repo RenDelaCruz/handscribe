@@ -13,10 +13,12 @@ class Colour(Enum):
     ORANGE: Final[BGR] = (0, 165, 255)
     YELLOW: Final[BGR] = (0, 255, 255)
     GREEN: Final[BGR] = (0, 255, 0)
-    MINT: Final[BGR] = (167, 255, 161)
-    TEAL: Final[BGR] = (150, 186, 12)
+    TEAL: Final[BGR] = (134, 166, 12)
     CYAN: Final[BGR] = (255, 245, 141)
-    BLUE: Final[BGR] = (255, 0, 0)
+    CERULEAN: Final[BGR] = (150, 131, 12)
+    BLUE: Final[BGR] = (150, 87, 12)
+    PURPLE: Final[BGR] = (150, 43, 117)
+    MAGENTA: Final[BGR] = (150, 0, 153)
 
 
 class LandmarkPoint(IntEnum):
@@ -43,17 +45,54 @@ class LandmarkPoint(IntEnum):
     PINKY_TIP: Final[int] = 20
 
 
+FINGER_GROUP_COLOURS: Final[dict[tuple[LandmarkPoint, ...], Colour]] = {
+    (
+        LandmarkPoint.WRIST,
+        LandmarkPoint.THUMB_CMC,
+        LandmarkPoint.THUMB_MCP,
+        LandmarkPoint.THUMB_IP,
+        LandmarkPoint.THUMB_TIP,
+    ): Colour.TEAL,
+    (
+        LandmarkPoint.INDEX_FINGER_MCP,
+        LandmarkPoint.INDEX_FINGER_PIP,
+        LandmarkPoint.INDEX_FINGER_DIP,
+        LandmarkPoint.INDEX_FINGER_TIP,
+    ): Colour.CERULEAN,
+    (
+        LandmarkPoint.MIDDLE_FINGER_MCP,
+        LandmarkPoint.MIDDLE_FINGER_PIP,
+        LandmarkPoint.MIDDLE_FINGER_DIP,
+        LandmarkPoint.MIDDLE_FINGER_TIP,
+    ): Colour.BLUE,
+    (
+        LandmarkPoint.RING_FINGER_MCP,
+        LandmarkPoint.RING_FINGER_PIP,
+        LandmarkPoint.RING_FINGER_DIP,
+        LandmarkPoint.RING_FINGER_TIP,
+    ): Colour.PURPLE,
+    (
+        LandmarkPoint.PINKY_MCP,
+        LandmarkPoint.PINKY_PIP,
+        LandmarkPoint.PINKY_DIP,
+        LandmarkPoint.PINKY_TIP,
+    ): Colour.MAGENTA,
+}
+
 HAND_LANDMARK_STYLE: dict[LandmarkPoint, DrawingSpec] = {}
-for point in LandmarkPoint:
-    b, g, r = Colour.TEAL.value
-    HAND_LANDMARK_STYLE[point] = DrawingSpec(
-        color=(
-            b,
-            g - point.value * 6
-            if point.value < LandmarkPoint.INDEX_FINGER_MCP
-            else g - point.value * 11,
-            r if point < LandmarkPoint.RING_FINGER_MCP else point.value * 9,
-        ),
-        thickness=3,
-        circle_radius=4,
-    )
+for group, colour in FINGER_GROUP_COLOURS.items():
+    for finger in group:
+        b, g, r = colour.value
+        HAND_LANDMARK_STYLE[finger] = DrawingSpec(
+            color=(
+                b,
+                g - finger * 6
+                if finger < LandmarkPoint.INDEX_FINGER_MCP
+                else g - 10 * ((finger - 1) % 4),
+                r
+                if finger < LandmarkPoint.RING_FINGER_MCP
+                else r + 10 * ((finger - 1) % 4),
+            ),
+            thickness=3,
+            circle_radius=4,
+        )

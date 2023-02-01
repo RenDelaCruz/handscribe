@@ -72,10 +72,15 @@ class SignLanguageTranslator:
                         )
 
                 # Draw metrics to screen
+                num_hands = (
+                    len(results.multi_hand_landmarks)
+                    if results.multi_hand_landmarks
+                    else 0
+                )
                 messages = (
                     "Toggle Landmarks: Press 1",
                     "Toggle Bounding Box: Press 2",
-                    f"Hands Detected: {len(results.multi_hand_landmarks) if results.multi_hand_landmarks else 0}",
+                    f"Hands Detected: {num_hands}",
                     "ESC to quit",
                 )
                 for y, text in enumerate(messages, start=1):
