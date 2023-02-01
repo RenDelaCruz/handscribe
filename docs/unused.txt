@@ -247,3 +247,21 @@ if __name__ == "__main__":
     # )
     # translator.start()
     https://www.geeksforgeeks.org/how-to-show-webcam-in-tkinter-window-python/
+
+
+
+
+HAND_LANDMARK_STYLE: dict[LandmarkPoint, DrawingSpec] = {}
+for point in LandmarkPoint:
+    b, g, r = Colour.TEAL.value
+    HAND_LANDMARK_STYLE[point] = DrawingSpec(
+        color=(
+            b,
+            g - point.value * 6
+            if point.value < LandmarkPoint.INDEX_FINGER_MCP
+            else g - point.value * 11,
+            r if point < LandmarkPoint.RING_FINGER_MCP else point.value * 9,
+        ),
+        thickness=3,
+        circle_radius=4,
+    )
