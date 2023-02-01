@@ -14,6 +14,7 @@
 ## Table of Contents <!-- omit from toc -->
 
 - [Introduction](#introduction)
+  - [American Sign Language](#american-sign-language)
   - [Project Objective](#project-objective)
 - [Usage](#usage)
   - [Environment Setup](#environment-setup)
