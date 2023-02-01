@@ -11,15 +11,31 @@
 
 ![Demo](docs/assets/demo.gif)
 
+## Table of Contents <!-- omit from toc -->
+
 - [Introduction](#introduction)
-- [Start](#start)
+  - [Project Objective](#project-objective)
+- [Usage](#usage)
   - [Environment Setup](#environment-setup)
-  - [Running the Project](#running-the-project)
+  - [Running the Program](#running-the-program)
+  - [Modes](#modes)
+  - [Quitting](#quitting)
 
 ## Introduction
 
+### American Sign Language
 
-## Start
+American Sign Language (ASL) serves as the main sign language of the deaf community in North America. In the language, words and grammar are composed of a combination of hand signals and facial expressions to convey sentences. However, for words without a sign, such as names and loanwords, there exists ASL fingerspelling, where English letters can be individually represented with a hand sign.
+
+![Fingerspelling Chart](docs/assets/fingerspelling-chart.png)
+
+For learners of ASL, it may be difficult to find someone from the deaf community to interact with. As such, it is often a challenge receiving adequate practice and feedback, even for something as simple as fingerspelling.
+
+### Project Objective
+
+The Sign Language Alphabet Translator (SLAT) uses machine learning classification algorithms to translate and identify a learner's fingerspelling signs live as it is shown to the computer camera.
+
+## Usage
 
 ### Environment Setup
 
@@ -33,9 +49,24 @@ To install `poetry`, run:
 $ pip install poetry
 ```
 
-### Running the Project
+### Running the Program
 
 1. Run `make init` to initialize the project by downloading all dependencies.
-2. Run `make start` to start the project.
+2. Run `make start` to start the app.
 
 > Run `make` to see a list of other commands.
+
+### Modes
+
+- Press `1` to toggle the hand landmarks shown on the screen.
+- Press `2` to toggle the bounding box.
+
+### Quitting
+
+- Press `ESC` to quit the program.
+
+----
+
+**Capstone Project**  
+CS 4ZP6 · Group 24  
+Ren de la Cruz (400051394)
