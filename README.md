@@ -9,7 +9,7 @@
 
 # Sign Language Alphabet Translator  <!-- omit from toc -->
 
-<video src='docs/demo.mp4'/></video>
+<img src="docs/assets/demo.gif" style="border-radius:5px;" />
 
 - [Introduction](#introduction)
 - [Start](#start)
