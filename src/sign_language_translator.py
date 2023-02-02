@@ -71,26 +71,12 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
-                # Draw metrics to screen
-                num_hands = (
-                    len(results.multi_hand_landmarks)
+                self.draw_metrics(
+                    image=image,
+                    num_hands=len(results.multi_hand_landmarks)
                     if results.multi_hand_landmarks
-                    else 0
+                    else 0,
                 )
-                messages = (
-                    "Toggle Landmarks: Press 1",
-                    "Toggle Bounding Box: Press 2",
-                    f"Hands Detected: {num_hands}",
-                    "ESC to quit",
-                )
-                for y, text in enumerate(messages, start=1):
-                    self.draw_text(
-                        image=image,
-                        text=text,
-                        position=(25, y * 25),
-                        font_scale=0.5,
-                    )
-
                 cv2.imshow("Sign Language AI Translator", image)
                 match cv2.waitKey(5) & 0xFF:
                     case 49:  # Press 1
@@ -227,3 +213,18 @@ class SignLanguageTranslator:
             text_colour=Colour.BLACK,
             background_colour=Colour.CYAN,
         )
+
+    def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
+        messages = (
+            "Toggle Landmarks: Press 1",
+            "Toggle Bounding Box: Press 2",
+            f"Hands Detected: {num_hands}",
+            "ESC to quit",
+        )
+        for y, text in enumerate(messages, start=1):
+            self.draw_text(
+                image=image,
+                text=text,
+                position=(25, y * 25),
+                font_scale=0.5,
+            )
