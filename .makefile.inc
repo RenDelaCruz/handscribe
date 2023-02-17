@@ -6,32 +6,24 @@ BLUE   := $(shell tput -Txterm setaf 6)
 WHITE  := $(shell tput -Txterm setaf 7)
 RESET  := $(shell tput -Txterm sgr0)
 
+TARGET_MAX_CHAR_NUM = 15
+
 define HELP_SCRIPT
-{
-	if ($$0 ~ /^.PHONY: [a-zA-Z\-\_0-9]+$$/) {
-		command = substr($$0, index($$0, ":") + 2);
-		if (message) {
-			printf "${YELLOW}%-20s ${GREEN}%s${RESET}\n", command, message;
-			message = "";
-		}
-	} else if ($$0 ~ /^[a-zA-Z\-\_0-9.]+:/) {
-		command = substr($$0, 0, index($$0, ":") - 1);
-		if (message) {
-			printf "${YELLOW}%-20s ${GREEN}%s${RESET}\n", command, message;
-			message = "";
-		}
-	} else if ($$0 ~ /^##/) {
-		if (message) {
-			message = sprintf("%s\n                     \t%s", message, substr($$0, 4));
+	if (/^.PHONY: (.*)/ || /^([A-Za-z0-9_-]+):/) {
+		$$command = $$1;
+	} elsif (/^## (.*)/) {
+		if ($$message) {
+			$$message = sprintf "%s\n%s%s", $$message, ' ' x ${TARGET_MAX_CHAR_NUM}, $$1;
 		} else {
-			message = substr($$0, 4);
+			$$message = $$1;
 		}
-	} else if (message) {
-		lineSkip = command ? "\n" : "";
-		printf "%s${BLUE}[%s]${RESET}\n", lineSkip, message;
-		message = "";
+	} elsif ($$command && $$message) {
+		printf "${YELLOW}%-${TARGET_MAX_CHAR_NUM}s${GREEN}%s${RESET}\n", $$command, $$message;
+		$$command = ""; $$message = "";
+	} elsif ($$message) {
+		printf "\n${BLUE}[%s]${RESET}\n", $$message;
+		$$message = "";
 	}
-}
 endef
 export HELP_SCRIPT
 
@@ -43,4 +35,4 @@ help:
 	@printf "${YELLOW}make${RESET} ${GREEN}<target>${RESET}\n\n";
 
 	@printf "Targets:\n";
-	@awk "$${HELP_SCRIPT}" $(MAKEFILE_LIST)
+	@perl -ne "$${HELP_SCRIPT}" $(MAKEFILE_LIST)
