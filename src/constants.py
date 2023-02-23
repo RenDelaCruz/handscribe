@@ -1,25 +1,5 @@
-from enum import Enum, IntEnum
-from typing import Final, Literal, TypeAlias
-
-from colour import Color as GradientPoint
-from mediapipe.python.solutions.drawing_styles import DrawingSpec
-
-BGR: TypeAlias = tuple[int, int, int]
-
-
-class Colour(Enum):
-    BLACK: Final[BGR] = (0, 0, 0)
-    WHITE: Final[BGR] = (255, 255, 255)
-    RED: Final[BGR] = (0, 0, 255)
-    ORANGE: Final[BGR] = (0, 165, 255)
-    YELLOW: Final[BGR] = (0, 255, 255)
-    GREEN: Final[BGR] = (0, 255, 0)
-    TEAL: Final[BGR] = (134, 166, 12)
-    CYAN: Final[BGR] = (255, 245, 141)
-    CERULEAN: Final[BGR] = (150, 131, 12)
-    BLUE: Final[BGR] = (150, 87, 12)
-    PURPLE: Final[BGR] = (150, 43, 117)
-    MAGENTA: Final[BGR] = (150, 0, 153)
+from enum import IntEnum
+from typing import Final
 
 
 class LandmarkPoint(IntEnum):
@@ -44,25 +24,3 @@ class LandmarkPoint(IntEnum):
     PINKY_PIP: Final[int] = 18
     PINKY_DIP: Final[int] = 19
     PINKY_TIP: Final[int] = 20
-
-
-TEAL: Final[str] = "#00B37D"
-MAGENTA: Final[str] = "#B52D75"
-RGB_MAX: Literal[255] = 255
-
-start_colour = GradientPoint(TEAL)
-end_colour = GradientPoint(MAGENTA)
-gradient = start_colour.range_to(end_colour, len(LandmarkPoint))
-gradient_points = (
-    (int(b * RGB_MAX), int(g * RGB_MAX), int(r * RGB_MAX))
-    for r, g, b in (grad.rgb for grad in gradient)
-)
-
-HAND_LANDMARK_STYLE: Final[dict[LandmarkPoint, DrawingSpec]] = {
-    point: DrawingSpec(
-        color=next(gradient_points),
-        thickness=3,
-        circle_radius=4,
-    )
-    for point in LandmarkPoint
-}
