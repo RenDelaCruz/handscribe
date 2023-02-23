@@ -1,6 +1,7 @@
 from enum import Enum, IntEnum
-from typing import Final, TypeAlias
+from typing import Final, Literal, TypeAlias
 
+from colour import Color as GradientPoint
 from mediapipe.python.solutions.drawing_styles import DrawingSpec
 
 BGR: TypeAlias = tuple[int, int, int]
@@ -45,54 +46,23 @@ class LandmarkPoint(IntEnum):
     PINKY_TIP: Final[int] = 20
 
 
-FINGER_GROUP_COLOURS: Final[dict[tuple[LandmarkPoint, ...], Colour]] = {
-    (
-        LandmarkPoint.WRIST,
-        LandmarkPoint.THUMB_CMC,
-        LandmarkPoint.THUMB_MCP,
-        LandmarkPoint.THUMB_IP,
-        LandmarkPoint.THUMB_TIP,
-    ): Colour.TEAL,
-    (
-        LandmarkPoint.INDEX_FINGER_MCP,
-        LandmarkPoint.INDEX_FINGER_PIP,
-        LandmarkPoint.INDEX_FINGER_DIP,
-        LandmarkPoint.INDEX_FINGER_TIP,
-    ): Colour.CERULEAN,
-    (
-        LandmarkPoint.MIDDLE_FINGER_MCP,
-        LandmarkPoint.MIDDLE_FINGER_PIP,
-        LandmarkPoint.MIDDLE_FINGER_DIP,
-        LandmarkPoint.MIDDLE_FINGER_TIP,
-    ): Colour.BLUE,
-    (
-        LandmarkPoint.RING_FINGER_MCP,
-        LandmarkPoint.RING_FINGER_PIP,
-        LandmarkPoint.RING_FINGER_DIP,
-        LandmarkPoint.RING_FINGER_TIP,
-    ): Colour.PURPLE,
-    (
-        LandmarkPoint.PINKY_MCP,
-        LandmarkPoint.PINKY_PIP,
-        LandmarkPoint.PINKY_DIP,
-        LandmarkPoint.PINKY_TIP,
-    ): Colour.MAGENTA,
-}
+TEAL: Final[str] = "#00B37D"
+MAGENTA: Final[str] = "#B52D75"
+RGB_MAX: Literal[255] = 255
 
-HAND_LANDMARK_STYLE: dict[LandmarkPoint, DrawingSpec] = {}
-for group, colour in FINGER_GROUP_COLOURS.items():
-    for finger in group:
-        b, g, r = colour.value
-        HAND_LANDMARK_STYLE[finger] = DrawingSpec(
-            color=(
-                b,
-                g - finger * 6
-                if finger < LandmarkPoint.INDEX_FINGER_MCP
-                else g - 10 * ((finger - 1) % 4),
-                r
-                if finger < LandmarkPoint.RING_FINGER_MCP
-                else r + 10 * ((finger - 1) % 4),
-            ),
-            thickness=3,
-            circle_radius=4,
-        )
+start_colour = GradientPoint(TEAL)
+end_colour = GradientPoint(MAGENTA)
+gradient = start_colour.range_to(end_colour, len(LandmarkPoint))
+gradient_points = (
+    (int(b * RGB_MAX), int(g * RGB_MAX), int(r * RGB_MAX))
+    for r, g, b in (grad.rgb for grad in gradient)
+)
+
+HAND_LANDMARK_STYLE: Final[dict[LandmarkPoint, DrawingSpec]] = {
+    point: DrawingSpec(
+        color=next(gradient_points),
+        thickness=3,
+        circle_radius=4,
+    )
+    for point in LandmarkPoint
+}

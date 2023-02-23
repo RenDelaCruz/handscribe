@@ -219,7 +219,6 @@ class SignLanguageTranslator:
             "Toggle Landmarks: Press 1",
             "Toggle Bounding Box: Press 2",
             f"Hands Detected: {num_hands}",
-            "ESC to quit",
         )
         for y, text in enumerate(messages, start=1):
             self.draw_text(
