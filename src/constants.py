@@ -1,5 +1,24 @@
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import Final
+
+
+class Mode(Enum):
+    def __str__(self) -> str:
+        return f"{self.value}"
+
+    SELECT: Final[str] = "Select"
+    FREEFORM: Final[str] = "Freeform"
+    DATA_COLLECTION: Final[str] = "Data Collection"
+
+
+class Key(IntEnum):
+    # Based on ord() values
+    Esc: Final[int] = 27
+    One: Final[int] = 49
+    Two: Final[int] = 50
+    D: Final[int] = 100
+    F: Final[int] = 102
+    M: Final[int] = 109
 
 
 class LandmarkPoint(IntEnum):

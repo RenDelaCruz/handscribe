@@ -1,0 +1,22 @@
+cv2.circle(
+    image,
+    (
+        (bounding_box.x + bounding_box.x2) // 2,
+        (bounding_box.y + bounding_box.y2) // 2,
+    ),
+    max(
+        bounding_box.y2 - bounding_box.y,
+        bounding_box.x2 - bounding_box.x,
+    )
+    // 2 + self.padding,
+    Colour.CYAN.value,
+    2,
+)
+return
+
+coordinates = np.empty((0, 2), int)
+for landmark in landmarks:
+    x = int(landmark.x * image_width)
+    y = int(landmark.y * image_height)
+    point = [np.array((x, y))]
+    coordinates = np.append(coordinates, point, axis=0)

@@ -9,7 +9,7 @@ RESET  := $(shell tput -Txterm sgr0)
 TARGET_MAX_CHAR_NUM = 15
 
 define HELP_SCRIPT
-	if (/^.PHONY: (.*)/ || /^([A-Za-z0-9_-]+):/) {
+	if ((/^.PHONY: (.*)/ || /^([A-Za-z0-9_-]+):/) && !$$command) {
 		$$command = $$1;
 	} elsif (/^## (.*)/) {
 		if ($$message) {
@@ -29,7 +29,6 @@ export HELP_SCRIPT
 
 ## Show help
 help:
-	@printf "\n\n";
 	@clear
 	@printf "Usage:\n";
 	@printf "${YELLOW}make${RESET} ${GREEN}<target>${RESET}\n\n";

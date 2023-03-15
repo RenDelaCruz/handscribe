@@ -3,12 +3,14 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from visuals import HAND_LANDMARK_STYLE, Colour
+from constants import Key, Mode
+from visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
 from dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
+import itertools
 
 
 class SignLanguageTranslator:
@@ -18,9 +20,6 @@ class SignLanguageTranslator:
         model_complexity: Literal[0, 1] = 1,
         min_detection_confidence: float = 0.75,
         min_tracking_confidence: float = 0.5,
-        show_landmarks: bool = True,
-        show_bounding_box: bool = True,
-        bounding_box_padding: int = 30,
     ) -> None:
         self.hands = mp_hands.Hands(
             max_num_hands=max_num_hands,
@@ -28,13 +27,23 @@ class SignLanguageTranslator:
             min_detection_confidence=min_detection_confidence,
             min_tracking_confidence=min_tracking_confidence,
         )
-        self.show_landmarks = show_landmarks
-        self.show_bounding_box = show_bounding_box
-        self.padding = bounding_box_padding
+        self.show_landmarks = True
+        self.show_bounding_box = True
+        self.padding = 30
+
+        self.mode = Mode.FREEFORM
+        self.mode_box_colour = Colour.CYAN
+        self.mode_landmark_style = HAND_LANDMARK_STYLE[self.mode]
 
     def start(self) -> None:
         with suppress(KeyboardInterrupt):
             self.capture_video()
+
+    def switch_mode(self, mode: Mode) -> None:
+        self.mode = mode
+        if mode != Mode.SELECT:
+            self.mode_box_colour = BOX_COLOUR[mode]
+            self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
 
     def capture_video(self) -> None:
         video_capture = cv2.VideoCapture(0)
@@ -64,6 +73,9 @@ class SignLanguageTranslator:
                         )
 
                         self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
+                        self.get_normalized_landmark_coordinates(
+                            image=image, landmarks=hand_landmarks.landmark
+                        )
                         self.draw_bounding_box(image=image, bounding_box=bounding_box)
                         self.draw_bounding_box_label(
                             image=image,
@@ -77,31 +89,44 @@ class SignLanguageTranslator:
                     if results.multi_hand_landmarks
                     else 0,
                 )
-                cv2.imshow("Sign Language AI Translator", image)
+
+                cv2.imshow("Sign Language Alphabet Translator", image)
                 match cv2.waitKey(5) & 0xFF:
-                    case 49:  # Press 1
+                    case Key.M if self.mode != Mode.SELECT:
+                        self.mode = Mode.SELECT
+                    case Key.F if self.mode == Mode.SELECT:
+                        self.switch_mode(Mode.FREEFORM)
+                    case Key.D if self.mode == Mode.SELECT:
+                        self.switch_mode(Mode.DATA_COLLECTION)
+                    case Key.One:
                         self.show_landmarks ^= True
-                    case 50:  # Press 2
+                    case Key.Two:
                         self.show_bounding_box ^= True
-                    case 27:  # Press ESC
+                    case Key.Esc:
                         break
 
         video_capture.release()
         cv2.destroyAllWindows()
 
-    def get_bounding_box(
+    def get_landmark_coordinates(
         self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
-    ) -> BoundingBox:
+    ) -> np.ndarray:
         image_height, image_width, _ = image.shape
 
-        landmark_points = np.empty((0, 2), int)
+        coordinates: list[tuple[int, int]] = []
         for landmark in landmarks:
             x = int(landmark.x * image_width)
             y = int(landmark.y * image_height)
-            point = [np.array((x, y))]
-            landmark_points = np.append(landmark_points, point, axis=0)
+            point = (x, y)
+            coordinates.append(point)
 
-        x, y, width, height = cv2.boundingRect(landmark_points)
+        return np.array(coordinates)
+
+    def get_bounding_box(
+        self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
+    ) -> BoundingBox:
+        landmark_coordinates = self.get_landmark_coordinates(image, landmarks)
+        x, y, width, height = cv2.boundingRect(landmark_coordinates)
 
         return BoundingBox(
             x=x - self.padding,
@@ -110,31 +135,46 @@ class SignLanguageTranslator:
             y2=height + y + self.padding,
         )
 
+    def get_normalized_landmark_coordinates(
+        self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
+    ) -> np.ndarray:
+        landmark_coordinates = self.get_landmark_coordinates(image, landmarks)
+        base_x, base_y = landmark_coordinates[0]
+
+        relative_coordinates: list[tuple[int, int]] = [(0, 0)]
+        for coordinate in landmark_coordinates[1:]:
+            landmark_x, landmark_y = coordinate
+            relative_point = (landmark_x - base_x, landmark_y - base_y)
+            relative_coordinates.append(relative_point)
+
+        # for r in relative_coordinates:
+        #     x, y = r
+        #     self.draw_text(
+        #         image=image, text=" ", position=(x + 300, y + 500), font_scale=0.5
+        #     )
+
+        # One-dimensional
+        flattened_coordinates = list(
+            itertools.chain.from_iterable(relative_coordinates)
+        )
+
+        # Min-max normalization
+        max_value = max(abs(coordinate) for coordinate in flattened_coordinates)
+        normalized_coordinates = [
+            coordinate / max_value for coordinate in flattened_coordinates
+        ]
+
+        return np.array(normalized_coordinates)
+
     def draw_bounding_box(self, image: np.ndarray, bounding_box: BoundingBox) -> None:
         if not self.show_bounding_box:
             return
-
-        # cv2.circle(
-        #     image,
-        #     (
-        #         (bounding_box.x + bounding_box.x2) // 2,
-        #         (bounding_box.y + bounding_box.y2) // 2,
-        #     ),
-        #     max(
-        #         bounding_box.y2 - bounding_box.y,
-        #         bounding_box.x2 - bounding_box.x,
-        #     )
-        #     // 2 + self.padding,
-        #     Colour.CYAN.value,
-        #     2,
-        # )
-        # return
 
         cv2.rectangle(
             img=image,
             pt1=(bounding_box.x, bounding_box.y),
             pt2=(bounding_box.x2, bounding_box.y2),
-            color=Colour.CYAN.value,
+            color=self.mode_box_colour.value,
             thickness=2,
         )
 
@@ -148,7 +188,7 @@ class SignLanguageTranslator:
             image=image,
             landmark_list=hand_landmarks,
             connections=mp_hands.HAND_CONNECTIONS,
-            landmark_drawing_spec=HAND_LANDMARK_STYLE,
+            landmark_drawing_spec=self.mode_landmark_style,
         )
 
     def draw_text(
@@ -174,7 +214,7 @@ class SignLanguageTranslator:
             pt1=position,
             pt2=(
                 x + text_width + (padding * 2),
-                y + text_height + (padding * 2) - 1,
+                y + text_height + (padding * 2),
             ),
             color=background_colour.value,
             thickness=-1,
@@ -211,19 +251,32 @@ class SignLanguageTranslator:
             font_scale=0.65,
             font_thickness=1,
             text_colour=Colour.BLACK,
-            background_colour=Colour.CYAN,
+            background_colour=self.mode_box_colour,
         )
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
-        messages = (
-            "Toggle Landmarks: Press 1",
-            "Toggle Bounding Box: Press 2",
-            f"Hands Detected: {num_hands}",
-        )
-        for y, text in enumerate(messages, start=1):
+        messages: tuple[str, ...]
+        if self.mode == Mode.SELECT:
+            messages = (
+                "Select Mode",
+                "[F] Freeform",
+                "[D] Data Collection",
+                "[1] Toggle Landmarks",
+                "[2] Toggle Bounding Box",
+            )
+        else:
+            messages = (
+                f"{self.mode} Mode",
+                "[M] Change mode",
+                f"Hands Detected: {num_hands}",
+            )
+
+        y_position = 25
+        for y, text in enumerate(messages):
             self.draw_text(
                 image=image,
                 text=text,
-                position=(25, y * 25),
-                font_scale=0.5,
+                position=(25, y_position),
+                font_scale=0.75 if y == 0 else 0.5,
             )
+            y_position += 30 if y == 0 else 25
