@@ -34,9 +34,10 @@ fix:
 	$(MAKE) type_check
 	$(MAKE) lint
 
+## Runs unit tests. Usage: make test [path.to.TestCase.method]
 .PHONY: test
 test:
-	poetry run python3 -m unittest
+	poetry run python3 -m unittest $(word 2, $(MAKECMDGOALS))
 
 ## Packages
 

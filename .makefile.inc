@@ -23,6 +23,8 @@ define HELP_SCRIPT
 	} elsif ($$message) {
 		printf "\n${BLUE}[%s]${RESET}\n", $$message;
 		$$message = "";
+	} elsif ($$command && !$$message) {
+		$$message = sprintf "${RED}<Missing>${RESET}";
 	}
 endef
 export HELP_SCRIPT
