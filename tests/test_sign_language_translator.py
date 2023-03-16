@@ -5,7 +5,6 @@ from src.constants import Mode
 from src.dataclass import BoundingBox
 from src.sign_language_translator import SignLanguageTranslator
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE
-from unittest.mock import create_autospec
 
 
 class SwitchModeTests(TestCase):
@@ -27,12 +26,12 @@ class SwitchModeTests(TestCase):
         )
 
 
+@patch("cv2.rectangle")
 class DrawBoundingBoxTests(TestCase):
     def setUp(self) -> None:
         self.translator = SignLanguageTranslator()
         self.image = Mock(shape=(100, 200, 3))
 
-    @patch("cv2.rectangle")
     def test__given_landmarks__returns_coordinate_points(
         self, mock_rectangle: MagicMock
     ) -> None:
