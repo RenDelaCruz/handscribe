@@ -3,9 +3,9 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from constants import Key, Mode
-from visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
-from dataclass import BoundingBox
+from src.constants import Key, Mode
+from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
+from src.dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing

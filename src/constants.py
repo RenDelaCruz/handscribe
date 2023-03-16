@@ -4,7 +4,7 @@ from typing import Final
 
 class Mode(Enum):
     def __str__(self) -> str:
-        return f"{self.value}"
+        return self.value
 
     SELECT: Final[str] = "Select"
     FREEFORM: Final[str] = "Freeform"

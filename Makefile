@@ -3,7 +3,7 @@ include .makefile.inc
 ## Starts the project. Use ESC in the app or CTRL+C in the terminal to stop
 .PHONY: start
 start:
-	poetry run python3 src/main.py
+	poetry run python3 -m src.main
 
 ## Initializes the project by installing packages 
 .PHONY: init
@@ -33,6 +33,10 @@ fix:
 	$(MAKE) format
 	$(MAKE) type_check
 	$(MAKE) lint
+
+.PHONY: test
+test:
+	poetry run python3 -m unittest
 
 ## Packages
 

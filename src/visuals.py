@@ -4,8 +4,9 @@ from enum import Enum
 from typing import Final, Iterator, Literal, TypeAlias
 
 from colour import Color, color_scale
-from constants import LandmarkPoint, Mode
 from mediapipe.python.solutions.drawing_styles import DrawingSpec
+
+from src.constants import LandmarkPoint, Mode
 
 BGR: TypeAlias = tuple[int, int, int]
 RGB: TypeAlias = tuple[float, float, float]
@@ -17,7 +18,7 @@ class Colour(Enum):
     WHITE: Final[BGR] = (255, 255, 255)
     RED: Final[BGR] = (0, 0, 255)
     ORANGE: Final[BGR] = (0, 165, 255)
-    YELLOW: Final[BGR] = (0, 255, 255)
+    YELLOW: Final[BGR] = (44, 230, 230)
     GREEN: Final[BGR] = (0, 255, 0)
     TEAL: Final[BGR] = (96, 138, 18)
     CYAN: Final[BGR] = (255, 245, 141)
@@ -46,13 +47,13 @@ class GradientPoint(Color):
 BOX_COLOUR: Final[dict[Mode, Colour]] = {}
 HAND_LANDMARK_STYLE: Final[dict[Mode, dict[LandmarkPoint, DrawingSpec]]] = {}
 
-for mode, main_colour, start, end in (
+for mode, main_colour, start_colour, end_colour in (
     (Mode.FREEFORM, Colour.CYAN, Colour.TEAL, Colour.MAGENTA),
     (Mode.DATA_COLLECTION, Colour.YELLOW, Colour.ORANGE, Colour.TEAL),
 ):
-    start_colour = GradientPoint(rgb=start.rgb)
-    end_colour = GradientPoint(rgb=end.rgb)
-    gradient = start_colour.range_to(end_colour, len(LandmarkPoint))
+    start = GradientPoint(rgb=start_colour.rgb)
+    end = GradientPoint(rgb=end_colour.rgb)
+    gradient = start.range_to(end, len(LandmarkPoint))
     gradient_points = (grad.bgr for grad in gradient)
 
     BOX_COLOUR[mode] = main_colour

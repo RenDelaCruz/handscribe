@@ -59,6 +59,13 @@ $ pip install poetry
 
 ### Modes
 
+The application starts in **Freeform** mode, where hand landmarks are shown. To change modes, press `M`.
+
+- `F` - Freeform mode
+- `D` - Data collection mode
+
+At any time, some visual elements can be toggled:
+
 - Press `1` to toggle the hand landmarks shown on the screen.
 - Press `2` to toggle the bounding box.
 
@@ -71,3 +78,12 @@ $ pip install poetry
 **Capstone Project**  
 CS 4ZP6 · Group 24  
 Ren de la Cruz (400051394)
+
+---
+
+**Planned**
+
+- [ ] Create test suite
+- [ ] Refactor to separate image drawer
+- [ ] Data collection mode
+- [ ] Learning model
