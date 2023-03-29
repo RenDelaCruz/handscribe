@@ -13,12 +13,17 @@ class Mode(Enum):
 
 class Key(IntEnum):
     # Based on ord() values
+    Tab: Final[int] = 9
     Esc: Final[int] = 27
+    Space: Final[int] = 32
+    Zero: Final[int] = 48
     One: Final[int] = 49
     Two: Final[int] = 50
+    Nine: Final[int] = 57
+    A: Final[int] = 97
     D: Final[int] = 100
     F: Final[int] = 102
-    M: Final[int] = 109
+    Z: Final[int] = 122
 
 
 class LandmarkPoint(IntEnum):
@@ -43,3 +48,47 @@ class LandmarkPoint(IntEnum):
     PINKY_PIP: Final[int] = 18
     PINKY_DIP: Final[int] = 19
     PINKY_TIP: Final[int] = 20
+
+
+CLASS_LABELS: Final[list[str]] = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "Space",
+]
+
+
+KEY_COORDINATES_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"

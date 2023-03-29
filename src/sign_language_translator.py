@@ -3,7 +3,8 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from src.constants import Key, Mode
+from src.constants import KEY_COORDINATES_CSV_PATH, Key, Mode, CLASS_LABELS
+from src.key_classifier import KeyClassifier
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
 from src.dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
@@ -11,6 +12,7 @@ from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 import itertools
+import csv
 
 
 class SignLanguageTranslator:
@@ -31,9 +33,13 @@ class SignLanguageTranslator:
         self.show_bounding_box = True
         self.padding = 30
 
+        self.pressed_key: str | None = None
+
         self.mode = Mode.FREEFORM
         self.mode_box_colour = Colour.CYAN
         self.mode_landmark_style = HAND_LANDMARK_STYLE[self.mode]
+
+        self.key_classifier = KeyClassifier()
 
     def start(self) -> None:
         with suppress(KeyboardInterrupt):
@@ -72,14 +78,26 @@ class SignLanguageTranslator:
                             image=image, landmarks=hand_landmarks.landmark
                         )
 
-                        self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
-                        self.get_normalized_landmark_coordinates(
-                            image=image, landmarks=hand_landmarks.landmark
+                        # Classify hand landmarks to predicted class
+                        normalized_coordinates = (
+                            self.get_normalized_landmark_coordinates(
+                                image=image,
+                                landmarks=hand_landmarks.landmark,
+                                flip=not handedness.classification[0].index,
+                            )
                         )
+                        class_id, confidence = self.key_classifier.process(
+                            normalized_coordinates
+                        )
+                        class_label = CLASS_LABELS[class_id]
+
+                        self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
                         self.draw_bounding_box(image=image, bounding_box=bounding_box)
                         self.draw_bounding_box_label(
                             image=image,
-                            text=handedness.classification[0].label,
+                            text=handedness.classification[0].label
+                            if self.mode == Mode.DATA_COLLECTION
+                            else f"{class_label}  {confidence:0.2f}",
                             bounding_box=bounding_box,
                         )
 
@@ -92,16 +110,36 @@ class SignLanguageTranslator:
 
                 cv2.imshow("Sign Language Alphabet Translator", image)
                 match cv2.waitKey(5) & 0xFF:
-                    case Key.M if self.mode != Mode.SELECT:
+                    case Key.Tab if self.mode != Mode.SELECT:
                         self.mode = Mode.SELECT
                     case Key.F if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.FREEFORM)
                     case Key.D if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.DATA_COLLECTION)
-                    case Key.One:
+                    case Key.One if self.mode == Mode.SELECT:
                         self.show_landmarks ^= True
-                    case Key.Two:
+                    case Key.Two if self.mode == Mode.SELECT:
                         self.show_bounding_box ^= True
+                    case key if (
+                        (is_space := key == Key.Space)
+                        or (is_letter := Key.A <= key <= Key.Z)
+                        # or (is_number := Key.Zero <= key <= Key.Nine)
+                    ) and self.mode == Mode.DATA_COLLECTION:
+                        self.pressed_key = "Space" if is_space else chr(key).upper()
+                        if is_letter:
+                            # A-Z == 0-25
+                            key_id = key - Key.A
+                        # elif is_number:
+                        #     # 0-9 == 26-35
+                        #     key_id = key - Key.Zero + 26
+                        else:
+                            # Changed from: # Space == 36
+                            # Space == 26
+                            key_id = 26
+
+                        self.log_key_coordinates(
+                            key_id=key_id, normalized_coordinates=normalized_coordinates
+                        )
                     case Key.Esc:
                         break
 
@@ -136,15 +174,21 @@ class SignLanguageTranslator:
         )
 
     def get_normalized_landmark_coordinates(
-        self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
-    ) -> np.ndarray:
+        self,
+        image: np.ndarray,
+        landmarks: RepeatedCompositeFieldContainer,
+        flip: bool,
+    ) -> list[float]:
         landmark_coordinates = self.get_landmark_coordinates(image, landmarks)
         base_x, base_y = landmark_coordinates[0]
 
         relative_coordinates: list[tuple[int, int]] = [(0, 0)]
         for coordinate in landmark_coordinates[1:]:
             landmark_x, landmark_y = coordinate
-            relative_point = (landmark_x - base_x, landmark_y - base_y)
+            relative_point = (
+                (landmark_x - base_x) * (-1 if flip else 1),
+                landmark_y - base_y,
+            )
             relative_coordinates.append(relative_point)
 
         # for r in relative_coordinates:
@@ -164,7 +208,14 @@ class SignLanguageTranslator:
             coordinate / max_value for coordinate in flattened_coordinates
         ]
 
-        return np.array(normalized_coordinates)
+        return normalized_coordinates
+
+    def log_key_coordinates(
+        self, key_id: int, normalized_coordinates: list[float]
+    ) -> None:
+        with open(KEY_COORDINATES_CSV_PATH, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([key_id, *normalized_coordinates])
 
     def draw_bounding_box(self, image: np.ndarray, bounding_box: BoundingBox) -> None:
         if not self.show_bounding_box:
@@ -213,7 +264,7 @@ class SignLanguageTranslator:
             img=image,
             pt1=position,
             pt2=(
-                x + text_width + (padding * 2),
+                x + text_width + (padding * 2) + 1,
                 y + text_height + (padding * 2),
             ),
             color=background_colour.value,
@@ -242,7 +293,7 @@ class SignLanguageTranslator:
             # Centre the label if no box
             else (bounding_box.x2 + bounding_box.x - (len(text) * 15)) // 2
         )
-        point_y = bounding_box.y
+        point_y = bounding_box.y - (0 if self.show_bounding_box else 30)
 
         self.draw_text(
             image=image,
@@ -256,20 +307,35 @@ class SignLanguageTranslator:
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
         messages: tuple[str, ...]
-        if self.mode == Mode.SELECT:
-            messages = (
-                "Select Mode",
-                "[F] Freeform",
-                "[D] Data Collection",
-                "[1] Toggle Landmarks",
-                "[2] Toggle Bounding Box",
-            )
-        else:
-            messages = (
-                f"{self.mode} Mode",
-                "[M] Change mode",
-                f"Hands Detected: {num_hands}",
-            )
+        match self.mode:
+            case Mode.SELECT:
+                messages = (
+                    "Select Mode",
+                    "[F] Freeform",
+                    "[D] Data Collection",
+                    "[1] Toggle Landmarks",
+                    "[2] Toggle Bounding Box",
+                )
+            case Mode.DATA_COLLECTION:
+                messages = (
+                    (
+                        f"{self.mode} Mode",
+                        "[Tab] Change mode",
+                        f"Saved Key: {self.pressed_key}",
+                    )
+                    if self.pressed_key
+                    else (
+                        f"{self.mode} Mode",
+                        "[Tab] Change mode",
+                        "Press a key to save data",
+                    )
+                )
+            case _:
+                messages = (
+                    f"{self.mode} Mode",
+                    "[Tab] Change mode",
+                    f"Hands Detected: {num_hands}",
+                )
 
         y_position = 25
         for y, text in enumerate(messages):

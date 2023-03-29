@@ -12,6 +12,11 @@ init:
 
 ## Development
 
+## Runs the training script to build the classifier model
+.PHONY: learn
+learn:
+	poetry run python3 -m src.key_train
+
 ## Formats the code using black
 .PHONY: format
 format:
