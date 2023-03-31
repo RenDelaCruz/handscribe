@@ -15,11 +15,8 @@ class Key(IntEnum):
     # Based on ord() values
     Tab: Final[int] = 9
     Esc: Final[int] = 27
-    Space: Final[int] = 32
-    Zero: Final[int] = 48
     One: Final[int] = 49
     Two: Final[int] = 50
-    Nine: Final[int] = 57
     A: Final[int] = 97
     D: Final[int] = 100
     F: Final[int] = 102
@@ -51,43 +48,32 @@ class LandmarkPoint(IntEnum):
 
 
 CLASS_LABELS: Final[list[str]] = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "Space",
+    "A",  # 0
+    "B",  # 1
+    "C",  # 2
+    "D",  # 3
+    "E",  # 4
+    "F",  # 5
+    "G",  # 6
+    "H",  # 7
+    "I",  # 8
+    "J",  # 9
+    "K",  # 10
+    "L",  # 11
+    "M",  # 12
+    "N",  # 13
+    "O",  # 14
+    "P",  # 15
+    "Q",  # 16
+    "R",  # 17
+    "S",  # 18
+    "T",  # 19
+    "U",  # 20
+    "V",  # 21
+    "W",  # 22
+    "X",  # 23
+    "Y",  # 24
+    "Z",  # 25
 ]
 
 

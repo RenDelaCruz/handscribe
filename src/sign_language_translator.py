@@ -1,18 +1,19 @@
+import csv
+import itertools
 from contextlib import suppress
 from typing import Literal
 
 import cv2
 import numpy as np
-from src.constants import KEY_COORDINATES_CSV_PATH, Key, Mode, CLASS_LABELS
-from src.key_classifier import KeyClassifier
-from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
-from src.dataclass import BoundingBox
 from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
-import itertools
-import csv
+
+from src.constants import CLASS_LABELS, KEY_COORDINATES_CSV_PATH, Key, Mode
+from src.dataclass import BoundingBox
+from src.key_classifier import KeyClassifier
+from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
 
 
 class SignLanguageTranslator:
@@ -121,22 +122,10 @@ class SignLanguageTranslator:
                     case Key.Two if self.mode == Mode.SELECT:
                         self.show_bounding_box ^= True
                     case key if (
-                        (is_space := key == Key.Space)
-                        or (is_letter := Key.A <= key <= Key.Z)
-                        # or (is_number := Key.Zero <= key <= Key.Nine)
+                        Key.A <= key <= Key.Z
                     ) and self.mode == Mode.DATA_COLLECTION:
-                        self.pressed_key = "Space" if is_space else chr(key).upper()
-                        if is_letter:
-                            # A-Z == 0-25
-                            key_id = key - Key.A
-                        # elif is_number:
-                        #     # 0-9 == 26-35
-                        #     key_id = key - Key.Zero + 26
-                        else:
-                            # Changed from: # Space == 36
-                            # Space == 26
-                            key_id = 26
-
+                        self.pressed_key = chr(key).upper()
+                        key_id = key - Key.A
                         self.log_key_coordinates(
                             key_id=key_id, normalized_coordinates=normalized_coordinates
                         )
@@ -202,7 +191,7 @@ class SignLanguageTranslator:
             itertools.chain.from_iterable(relative_coordinates)
         )
 
-        # Min-max normalization
+        # Min-max normalization to unit vector
         max_value = max(abs(coordinate) for coordinate in flattened_coordinates)
         normalized_coordinates = [
             coordinate / max_value for coordinate in flattened_coordinates
