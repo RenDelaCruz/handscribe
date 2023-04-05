@@ -12,7 +12,7 @@ from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 
 from src.constants import KEY_COORDINATES_DATASET_CSV_PATH, WORDS_TXT_PATH, Key, Mode
-from src.dataclass import BoundingBox
+from src.dataclass import BoundingBox, SuccessiveLetter
 from src.key_classifier import KeyClassifier
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
 
@@ -38,12 +38,17 @@ class SignLanguageTranslator:
         self.show_bounding_box = True
         self.padding = 30
 
+        # Data Collection mode
         self.pressed_key: str | None = None
+
+        # Game mode
         self.points = 0
         self.current_word = ""
         self.letters_guessed = 0
         self.words_guessed = 0
+        self.successive_letter: SuccessiveLetter | None = None
 
+        # Set to default Freeform modes
         self.mode = Mode.FREEFORM
         self.mode_box_colour = Colour.CYAN
         self.mode_landmark_style = HAND_LANDMARK_STYLE[self.mode]
@@ -56,18 +61,18 @@ class SignLanguageTranslator:
 
     def switch_mode(self, mode: Mode) -> None:
         self.mode = mode
-        if mode == Mode.GAME:
-            self.points = 0
-            self.current_word = self.get_random_word()
-            self.letters_guessed = 0
-            self.words_guessed = 0
-        elif mode != Mode.SELECT:
-            self.mode_box_colour = BOX_COLOUR[mode]
-            self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
+        match mode:
+            case Mode.GAME:
+                self.reset_to_next_word()
+            case Mode.FREEFORM | Mode.DATA_COLLECTION:
+                self.mode_box_colour = BOX_COLOUR[mode]
+                self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
+
+                if mode == Mode.DATA_COLLECTION:
+                    self.pressed_key = None
 
     def capture_video(self) -> None:
         video_capture = cv2.VideoCapture(0)
-        class_label = ""
 
         with self.hands as hands:
             while video_capture.isOpened():
@@ -92,7 +97,6 @@ class SignLanguageTranslator:
                         landmark_coordinates = self.get_landmark_coordinates(
                             image=image, landmarks=hand_landmarks.landmark
                         )
-
                         bounding_box = self.get_bounding_box(
                             landmark_coordinates=landmark_coordinates
                         )
@@ -119,16 +123,9 @@ class SignLanguageTranslator:
                         )
 
                         if self.mode == Mode.GAME:
-                            word_length = len(self.current_word)
-                            # Reset to next word
-                            if self.letters_guessed == word_length:
-                                self.current_word = self.get_random_word()
-                                self.letters_guessed = 0
-                                self.points += word_length
-                                self.words_guessed += 1
-                            # Keep track of guessed word
-                            elif class_label == self.current_word[self.letters_guessed]:
-                                self.letters_guessed += 1
+                            self.spell_letter(
+                                class_label=class_label, bounding_box=bounding_box
+                            )
 
                 self.draw_metrics(
                     image=image,
@@ -336,8 +333,46 @@ class SignLanguageTranslator:
             thin=True,
         )
 
+    def reset_to_next_word(self, points: int = 0) -> None:
+        self.current_word = self.get_random_word()
+        self.letters_guessed = 0
+
+        if points:
+            self.points += points
+            self.words_guessed += 1
+        else:
+            self.points = 0
+            self.words_guessed = 0
+
     def get_random_word(self) -> str:
         return random.choice(words).upper()
+
+    def spell_letter(self, class_label: str, bounding_box: BoundingBox) -> None:
+        word_length = len(self.current_word)
+        if self.letters_guessed == word_length:
+            self.reset_to_next_word(points=word_length)
+        elif class_label == self.current_word[self.letters_guessed]:
+            is_next_letter_the_same = (
+                self.letters_guessed + 1 < word_length
+                and self.current_word[self.letters_guessed]
+                == self.current_word[self.letters_guessed + 1]
+            )
+
+            if not self.successive_letter:
+                self.letters_guessed += 1
+
+                if is_next_letter_the_same:
+                    width = bounding_box.x2 - bounding_box.x
+                    centre_x = bounding_box.x + width // 2
+                    self.successive_letter = SuccessiveLetter(
+                        centre_x=centre_x, width=width
+                    )
+            elif (
+                bounding_box.x2 > self.successive_letter.right_margin
+                or bounding_box.x < self.successive_letter.left_margin
+            ):
+                self.letters_guessed += 1
+                self.successive_letter = None
 
     def draw_game_words(self, image: np.ndarray) -> None:
         x_position = 25
