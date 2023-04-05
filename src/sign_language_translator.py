@@ -75,22 +75,24 @@ class SignLanguageTranslator:
                         results.multi_handedness,
                         strict=False,
                     ):
-                        bounding_box = self.get_bounding_box(
+                        landmark_coordinates = self.get_landmark_coordinates(
                             image=image, landmarks=hand_landmarks.landmark
+                        )
+
+                        bounding_box = self.get_bounding_box(
+                            landmark_coordinates=landmark_coordinates
                         )
 
                         # Classify hand landmarks to predicted class
                         normalized_coordinates = (
                             self.get_normalized_landmark_coordinates(
-                                image=image,
-                                landmarks=hand_landmarks.landmark,
+                                landmark_coordinates=landmark_coordinates,
                                 flip=not handedness.classification[0].index,
                             )
                         )
-                        class_id, confidence = self.key_classifier.process(
+                        class_label, confidence = self.key_classifier.process(
                             normalized_coordinates
                         )
-                        class_label = CLASS_LABELS[class_id]
 
                         self.draw_landmarks(image=image, hand_landmarks=hand_landmarks)
                         self.draw_bounding_box(image=image, bounding_box=bounding_box)
@@ -149,10 +151,7 @@ class SignLanguageTranslator:
 
         return np.array(coordinates)
 
-    def get_bounding_box(
-        self, image: np.ndarray, landmarks: RepeatedCompositeFieldContainer
-    ) -> BoundingBox:
-        landmark_coordinates = self.get_landmark_coordinates(image, landmarks)
+    def get_bounding_box(self, landmark_coordinates: np.ndarray) -> BoundingBox:
         x, y, width, height = cv2.boundingRect(landmark_coordinates)
 
         return BoundingBox(
@@ -163,18 +162,15 @@ class SignLanguageTranslator:
         )
 
     def get_normalized_landmark_coordinates(
-        self,
-        image: np.ndarray,
-        landmarks: RepeatedCompositeFieldContainer,
-        flip: bool,
+        self, landmark_coordinates: np.ndarray, flip: bool
     ) -> list[float]:
-        landmark_coordinates = self.get_landmark_coordinates(image, landmarks)
         base_x, base_y = landmark_coordinates[0]
 
         relative_coordinates: list[tuple[int, int]] = [(0, 0)]
         for coordinate in landmark_coordinates[1:]:
             landmark_x, landmark_y = coordinate
             relative_point = (
+                # Flip coordinates for left hand
                 (landmark_x - base_x) * (-1 if flip else 1),
                 landmark_y - base_y,
             )

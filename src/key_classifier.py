@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from src.constants import TFLITE_SAVE_PATH
+from src.constants import CLASS_LABELS, TFLITE_SAVE_PATH
 
 
 class KeyClassifier:
@@ -21,7 +21,7 @@ class KeyClassifier:
     def process(
         self,
         landmark_list: list[float],
-    ) -> tuple[int, float]:
+    ) -> tuple[str, float]:
         input_details_tensor_index = self.input_details[0]["index"]
         self.interpreter.set_tensor(
             input_details_tensor_index, np.array([landmark_list], dtype=np.float32)
@@ -32,5 +32,5 @@ class KeyClassifier:
 
         result = self.interpreter.get_tensor(output_details_tensor_index)
         prediction = np.squeeze(result)
-        prediction_index = np.argmax(prediction)
-        return int(prediction_index), float(prediction[prediction_index])
+        prediction_index = int(np.argmax(prediction))
+        return CLASS_LABELS[prediction_index], float(prediction[prediction_index])

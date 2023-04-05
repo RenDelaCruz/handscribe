@@ -8,18 +8,19 @@ from src import _
 from src.constants import DATASET_CSV_PATH, MODEL_SAVE_PATH, TFLITE_SAVE_PATH
 
 RANDOM_SEED = 42
+NUM_POINTS = 21 * 2
 NUM_CLASSES = 26
 
 
 if __name__ == "__main__":
-    # Read dataset
+    # Read and split dataset
     x_dataset = np.loadtxt(
         DATASET_CSV_PATH,
         delimiter=",",
-        dtype="float32",
-        usecols=list(range(1, (21 * 2) + 1)),
+        dtype=np.float32,
+        usecols=list(range(1, NUM_POINTS + 1)),
     )
-    y_dataset = np.loadtxt(DATASET_CSV_PATH, delimiter=",", dtype="int32", usecols=(0))
+    y_dataset = np.loadtxt(DATASET_CSV_PATH, delimiter=",", dtype=np.int32, usecols=(0))
     x_train, x_test, y_train, y_test = train_test_split(
         x_dataset, y_dataset, train_size=0.75, random_state=RANDOM_SEED
     )
@@ -27,7 +28,7 @@ if __name__ == "__main__":
     # Build model
     model = tf.keras.models.Sequential(
         [
-            tf.keras.layers.Input((21 * 2,)),
+            tf.keras.layers.Input((NUM_POINTS,)),
             tf.keras.layers.Dropout(0.1),
             tf.keras.layers.Dense(60, activation="relu"),
             tf.keras.layers.Dropout(0.2),
@@ -41,20 +42,9 @@ if __name__ == "__main__":
             tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"),
         ]
     )
-    # First model
-    # model = tf.keras.models.Sequential(
-    #     [
-    #         tf.keras.layers.Input((21 * 2,)),
-    #         tf.keras.layers.Dropout(0.2),
-    #         tf.keras.layers.Dense(20, activation="relu"),
-    #         tf.keras.layers.Dropout(0.4),
-    #         tf.keras.layers.Dense(10, activation="relu"),
-    #         tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"),
-    #     ]
-    # )
 
+    # Model summary
     print(_("\nModel summary: "))
-
     model.summary()
 
     input(_("\nPress [Enter] to start model training: "))
@@ -63,8 +53,10 @@ if __name__ == "__main__":
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         MODEL_SAVE_PATH, verbose=1, save_weights_only=False
     )
+
     # Callback for early stopping
     es_callback = tf.keras.callbacks.EarlyStopping(patience=60, verbose=1)
+
     # Model compilation
     model.compile(
         optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
@@ -80,9 +72,8 @@ if __name__ == "__main__":
         callbacks=[cp_callback, es_callback],
     )
 
-    print(_("\nModel evaluation: "))
-
     # Model evaluation
+    print(_("\nModel evaluation: "))
     val_loss, val_acc = model.evaluate(x_test, y_test, batch_size=128)
 
     # Loading the saved model
