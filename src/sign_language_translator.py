@@ -183,7 +183,10 @@ class SignLanguageTranslator:
         # for r in relative_coordinates:
         #     x, y = r
         #     self.draw_text(
-        #         image=image, text=" ", position=(x + 300, y + 500), font_scale=0.5
+        #         image=image,
+        #         text=f"{(x,y)}",
+        #         position=(x + 300, y + 500),
+        #         font_scale=0.5
         #     )
 
         # One-dimensional
@@ -191,7 +194,7 @@ class SignLanguageTranslator:
             itertools.chain.from_iterable(relative_coordinates)
         )
 
-        # Min-max normalization to unit vector
+        # Min-max normalization from [-1, 1]
         max_value = max(abs(coordinate) for coordinate in flattened_coordinates)
         normalized_coordinates = [
             coordinate / max_value for coordinate in flattened_coordinates

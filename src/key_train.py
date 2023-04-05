@@ -5,41 +5,55 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from src import _
+from src.constants import DATASET_CSV_PATH, MODEL_SAVE_PATH, TFLITE_SAVE_PATH
 
 RANDOM_SEED = 42
-
-dataset = "models/data/key_coordinates.csv"
-model_save_path = "models/key_classifier.hdf5"
-tflite_save_path = "models/key_classifier.tflite"
-
-NUM_CLASSES = 26  # 27  # 37
+NUM_CLASSES = 26
 
 
 if __name__ == "__main__":
     # Read dataset
-    print(_("\nSplitting dataset."))
     x_dataset = np.loadtxt(
-        dataset, delimiter=",", dtype="float32", usecols=list(range(1, (21 * 2) + 1))
+        DATASET_CSV_PATH,
+        delimiter=",",
+        dtype="float32",
+        usecols=list(range(1, (21 * 2) + 1)),
     )
-    y_dataset = np.loadtxt(dataset, delimiter=",", dtype="int32", usecols=(0))
+    y_dataset = np.loadtxt(DATASET_CSV_PATH, delimiter=",", dtype="int32", usecols=(0))
     x_train, x_test, y_train, y_test = train_test_split(
         x_dataset, y_dataset, train_size=0.75, random_state=RANDOM_SEED
     )
 
     # Build model
-    print(_("\nSetting up model."))
     model = tf.keras.models.Sequential(
         [
             tf.keras.layers.Input((21 * 2,)),
+            tf.keras.layers.Dropout(0.1),
+            tf.keras.layers.Dense(60, activation="relu"),
             tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(20, activation="relu"),
-            tf.keras.layers.Dropout(0.4),
-            tf.keras.layers.Dense(10, activation="relu"),
+            tf.keras.layers.Dense(80, activation="relu"),
+            tf.keras.layers.Dropout(0.3),
+            tf.keras.layers.Dense(60, activation="relu"),
+            tf.keras.layers.Dropout(0.3),
+            tf.keras.layers.Dense(40, activation="relu"),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(30, activation="relu"),
             tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"),
         ]
     )
+    # First model
+    # model = tf.keras.models.Sequential(
+    #     [
+    #         tf.keras.layers.Input((21 * 2,)),
+    #         tf.keras.layers.Dropout(0.2),
+    #         tf.keras.layers.Dense(20, activation="relu"),
+    #         tf.keras.layers.Dropout(0.4),
+    #         tf.keras.layers.Dense(10, activation="relu"),
+    #         tf.keras.layers.Dense(NUM_CLASSES, activation="softmax"),
+    #     ]
+    # )
 
-    input(_("\nPress [Enter] for model summary: "))
+    print(_("\nModel summary: "))
 
     model.summary()
 
@@ -47,7 +61,7 @@ if __name__ == "__main__":
 
     # Model checkpoint callback
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
-        model_save_path, verbose=1, save_weights_only=False
+        MODEL_SAVE_PATH, verbose=1, save_weights_only=False
     )
     # Callback for early stopping
     es_callback = tf.keras.callbacks.EarlyStopping(patience=60, verbose=1)
@@ -66,13 +80,13 @@ if __name__ == "__main__":
         callbacks=[cp_callback, es_callback],
     )
 
-    input(_("\nPress [Enter] for model evaluation: "))
+    print(_("\nModel evaluation: "))
 
     # Model evaluation
     val_loss, val_acc = model.evaluate(x_test, y_test, batch_size=128)
 
     # Loading the saved model
-    model = tf.keras.models.load_model(model_save_path)
+    model = tf.keras.models.load_model(MODEL_SAVE_PATH)
 
     input(_("\nPress [Enter] for inference test: "))
 
@@ -84,18 +98,18 @@ if __name__ == "__main__":
     input(_("\nPress [Enter] to save model: "))
 
     # Save as a model dedicated to inference
-    model.save(model_save_path, include_optimizer=False)
+    model.save(MODEL_SAVE_PATH, include_optimizer=False)
 
     # Transform model (quantization)
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     tflite_quantized_model = converter.convert()
 
-    with Path(tflite_save_path).open("wb") as f:
+    with Path(TFLITE_SAVE_PATH).open("wb") as f:
         f.write(tflite_quantized_model)
 
     # Additional inference test
-    interpreter = tf.lite.Interpreter(model_path=tflite_save_path)
+    interpreter = tf.lite.Interpreter(model_path=TFLITE_SAVE_PATH)
     interpreter.allocate_tensors()
 
     # Get I / O tensor

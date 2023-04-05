@@ -1,13 +1,13 @@
 import numpy as np
 import tensorflow as tf
 
-from src.key_train import tflite_save_path
+from src.constants import TFLITE_SAVE_PATH
 
 
 class KeyClassifier:
     def __init__(
         self,
-        model_path: str = tflite_save_path,
+        model_path: str = TFLITE_SAVE_PATH,
         num_threads: int = 1,
     ) -> None:
         self.interpreter = tf.lite.Interpreter(

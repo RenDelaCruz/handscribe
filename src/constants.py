@@ -1,14 +1,19 @@
 from enum import Enum, IntEnum
 from typing import Final
 
+KEY_COORDINATES_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
+DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
+MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
+TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
+
 
 class Mode(Enum):
-    def __str__(self) -> str:
-        return self.value
-
     SELECT: Final[str] = "Select"
     FREEFORM: Final[str] = "Freeform"
     DATA_COLLECTION: Final[str] = "Data Collection"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class Key(IntEnum):
@@ -75,6 +80,3 @@ CLASS_LABELS: Final[list[str]] = [
     "Y",  # 24
     "Z",  # 25
 ]
-
-
-KEY_COORDINATES_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
