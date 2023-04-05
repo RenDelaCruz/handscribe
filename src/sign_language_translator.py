@@ -1,6 +1,7 @@
 import csv
 import itertools
 from contextlib import suppress
+import random
 from typing import Literal
 
 import cv2
@@ -10,10 +11,13 @@ from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 
-from src.constants import CLASS_LABELS, KEY_COORDINATES_DATASET_CSV_PATH, Key, Mode
+from src.constants import KEY_COORDINATES_DATASET_CSV_PATH, WORDS_TXT_PATH, Key, Mode
 from src.dataclass import BoundingBox
 from src.key_classifier import KeyClassifier
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
+
+with open(WORDS_TXT_PATH, "r") as f:
+    words = f.read().split("\n")
 
 
 class SignLanguageTranslator:
@@ -35,6 +39,10 @@ class SignLanguageTranslator:
         self.padding = 30
 
         self.pressed_key: str | None = None
+        self.points = 0
+        self.current_word = ""
+        self.letters_guessed = 0
+        self.words_guessed = 0
 
         self.mode = Mode.FREEFORM
         self.mode_box_colour = Colour.CYAN
@@ -48,12 +56,18 @@ class SignLanguageTranslator:
 
     def switch_mode(self, mode: Mode) -> None:
         self.mode = mode
-        if mode != Mode.SELECT:
+        if mode == Mode.GAME:
+            self.points = 0
+            self.current_word = self.get_random_word()
+            self.letters_guessed = 0
+            self.words_guessed = 0
+        elif mode != Mode.SELECT:
             self.mode_box_colour = BOX_COLOUR[mode]
             self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
 
     def capture_video(self) -> None:
         video_capture = cv2.VideoCapture(0)
+        class_label = ""
 
         with self.hands as hands:
             while video_capture.isOpened():
@@ -104,6 +118,18 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
+                        if self.mode == Mode.GAME:
+                            word_length = len(self.current_word)
+                            # Reset to next word
+                            if self.letters_guessed == word_length:
+                                self.current_word = self.get_random_word()
+                                self.letters_guessed = 0
+                                self.points += word_length
+                                self.words_guessed += 1
+                            # Keep track of guessed word
+                            elif class_label == self.current_word[self.letters_guessed]:
+                                self.letters_guessed += 1
+
                 self.draw_metrics(
                     image=image,
                     num_hands=len(results.multi_hand_landmarks)
@@ -111,12 +137,17 @@ class SignLanguageTranslator:
                     else 0,
                 )
 
+                if self.mode == Mode.GAME:
+                    self.draw_game_words(image=image)
+
                 cv2.imshow("Sign Language Alphabet Translator", image)
                 match cv2.waitKey(5) & 0xFF:
                     case Key.Tab if self.mode != Mode.SELECT:
                         self.mode = Mode.SELECT
                     case Key.F if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.FREEFORM)
+                    case Key.G if self.mode == Mode.SELECT:
+                        self.switch_mode(Mode.GAME)
                     case Key.D if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.DATA_COLLECTION)
                     case Key.One if self.mode == Mode.SELECT:
@@ -241,6 +272,7 @@ class SignLanguageTranslator:
         font_thickness: int = 1,
         text_colour: Colour = Colour.WHITE,
         background_colour: Colour = Colour.BLACK,
+        thin: bool = False,
     ) -> None:
         x, y = position
         text_size, _ = cv2.getTextSize(
@@ -254,6 +286,11 @@ class SignLanguageTranslator:
             pt2=(
                 x + text_width + (padding * 2) + 1,
                 y + text_height + (padding * 2),
+            )
+            if thin
+            else (
+                x + text_width + int(padding * 2.5) + 1,
+                y + text_height + (padding * 4) + 1,
             ),
             color=background_colour.value,
             thickness=-1,
@@ -264,6 +301,11 @@ class SignLanguageTranslator:
             org=(
                 x + padding + 1,
                 y + text_height + padding - 1,
+            )
+            if thin
+            else (
+                x + int(padding * 1.5) + 1,
+                y + text_height + (padding * 2) - 1,
             ),
             fontFace=font,
             fontScale=font_scale,
@@ -291,7 +333,39 @@ class SignLanguageTranslator:
             font_thickness=1,
             text_colour=Colour.BLACK,
             background_colour=self.mode_box_colour,
+            thin=True,
         )
+
+    def get_random_word(self) -> str:
+        return random.choice(words).upper()
+
+    def draw_game_words(self, image: np.ndarray) -> None:
+        x_position = 25
+        font_scale = 3
+        font_thickness = 8
+
+        for index, letter in enumerate(self.current_word):
+            text_size, _ = cv2.getTextSize(
+                text=letter,
+                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=font_scale,
+                thickness=font_thickness,
+            )
+            text_width, text_height = text_size
+            self.draw_text(
+                image=image,
+                text=letter,
+                position=(
+                    x_position,
+                    image.shape[0] - text_height - 25 * 2,
+                ),
+                font_scale=font_scale,
+                font_thickness=font_thickness,
+                text_colour=Colour.GREEN
+                if self.letters_guessed > index
+                else Colour.WHITE,
+            )
+            x_position += text_width + 10
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
         messages: tuple[str, ...]
@@ -300,28 +374,27 @@ class SignLanguageTranslator:
                 messages = (
                     "Select Mode",
                     "[F] Freeform",
+                    "[G] Game",
                     "[D] Data Collection",
                     "[1] Toggle Landmarks",
                     "[2] Toggle Bounding Box",
                 )
+            case Mode.GAME:
+                messages = (
+                    f"{self.mode} Mode",
+                    f"Words Guessed: {self.words_guessed}",
+                    f"Points: {self.points}",
+                )
             case Mode.DATA_COLLECTION:
                 messages = (
-                    (
-                        f"{self.mode} Mode",
-                        "[Tab] Change mode",
-                        f"Saved Key: {self.pressed_key}",
-                    )
+                    f"{self.mode} Mode",
+                    f"Saved Key: {self.pressed_key}"
                     if self.pressed_key
-                    else (
-                        f"{self.mode} Mode",
-                        "[Tab] Change mode",
-                        "Press a key to save data",
-                    )
+                    else "Press a key to save data",
                 )
             case _:
                 messages = (
                     f"{self.mode} Mode",
-                    "[Tab] Change mode",
                     f"Hands Detected: {num_hands}",
                 )
 
@@ -332,5 +405,6 @@ class SignLanguageTranslator:
                 text=text,
                 position=(25, y_position),
                 font_scale=0.75 if y == 0 else 0.5,
+                font_thickness=2 if y == 0 else 1,
             )
-            y_position += 30 if y == 0 else 25
+            y_position += 40 if y == 0 else 35

@@ -4,12 +4,14 @@ from typing import Final
 KEY_COORDINATES_DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
 MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
 TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
+WORDS_TXT_PATH: Final[str] = "models/data/words.txt"
 
 
 class Mode(Enum):
     SELECT: Final[str] = "Select"
     FREEFORM: Final[str] = "Freeform"
     DATA_COLLECTION: Final[str] = "Data Collection"
+    GAME: Final[str] = "Game"
 
     def __str__(self) -> str:
         return self.value
@@ -24,6 +26,7 @@ class Key(IntEnum):
     A: Final[int] = 97
     D: Final[int] = 100
     F: Final[int] = 102
+    G: Final[int] = 103
     Z: Final[int] = 122
 
 
