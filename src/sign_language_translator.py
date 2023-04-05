@@ -10,7 +10,7 @@ from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
 
-from src.constants import CLASS_LABELS, KEY_COORDINATES_CSV_PATH, Key, Mode
+from src.constants import CLASS_LABELS, KEY_COORDINATES_DATASET_CSV_PATH, Key, Mode
 from src.dataclass import BoundingBox
 from src.key_classifier import KeyClassifier
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
@@ -201,7 +201,7 @@ class SignLanguageTranslator:
     def log_key_coordinates(
         self, key_id: int, normalized_coordinates: list[float]
     ) -> None:
-        with open(KEY_COORDINATES_CSV_PATH, "a", newline="") as f:
+        with open(KEY_COORDINATES_DATASET_CSV_PATH, "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow([key_id, *normalized_coordinates])
 

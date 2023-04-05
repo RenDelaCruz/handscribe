@@ -5,7 +5,11 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from src import _
-from src.constants import DATASET_CSV_PATH, MODEL_SAVE_PATH, TFLITE_SAVE_PATH
+from src.constants import (
+    KEY_COORDINATES_DATASET_CSV_PATH,
+    MODEL_SAVE_PATH,
+    TFLITE_SAVE_PATH,
+)
 
 RANDOM_SEED = 42
 NUM_POINTS = 21 * 2
@@ -15,12 +19,14 @@ NUM_CLASSES = 26
 if __name__ == "__main__":
     # Read and split dataset
     x_dataset = np.loadtxt(
-        DATASET_CSV_PATH,
+        KEY_COORDINATES_DATASET_CSV_PATH,
         delimiter=",",
         dtype=np.float32,
         usecols=list(range(1, NUM_POINTS + 1)),
     )
-    y_dataset = np.loadtxt(DATASET_CSV_PATH, delimiter=",", dtype=np.int32, usecols=(0))
+    y_dataset = np.loadtxt(
+        KEY_COORDINATES_DATASET_CSV_PATH, delimiter=",", dtype=np.int32, usecols=(0)
+    )
     x_train, x_test, y_train, y_test = train_test_split(
         x_dataset, y_dataset, train_size=0.75, random_state=RANDOM_SEED
     )

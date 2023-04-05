@@ -1,8 +1,7 @@
 from enum import Enum, IntEnum
 from typing import Final
 
-KEY_COORDINATES_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
-DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
+KEY_COORDINATES_DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
 MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
 TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
 
