@@ -65,19 +65,20 @@ $ pip install poetry
 
 ### Quitting
 
-- Press `ESC` to quit the program.
+- Press <kbd>ESC</kbd> to quit the program.
+- Alternatively, press <kbd>CTRL</kbd> + <kbd>C</kbd> in the terminal.
 
 ## Modes
 
-The application starts in Freeform mode, where hand landmarks are shown. To change modes, press `Tab`.
+The application starts in Freeform mode, where hand landmarks are shown. To change modes, press <kbd>TAB</kbd>.
 
-- `F` - Freeform mode
-- `D` - Data Collection mode
+- <kbd>F</kbd> - Freeform mode
+- <kbd>D</kbd> - Data Collection mode
 
 In this Select mode, some visual elements can be toggled:
 
-- Press `1` to toggle the hand landmarks shown on the screen.
-- Press `2` to toggle the bounding box.
+- Press <kbd>1</kbd> to toggle the hand landmarks shown on the screen.
+- Press <kbd>2</kbd> to toggle the bounding box.
 
 ### Freeform Mode
 
