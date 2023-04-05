@@ -7,7 +7,7 @@ class ProcessTests(TestCase):
     def setUp(self) -> None:
         self.key_classifier = KeyClassifier()
 
-    def test__given_landmark_coordinates__returns_a_predicted_class_label_with_confidence(
+    def test__given_landmark_coordinates__returns_predicted_class_label_with_confidence(
         self,
     ) -> None:
         # given
