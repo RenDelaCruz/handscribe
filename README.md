@@ -73,6 +73,7 @@ $ pip install poetry
 The application starts in Freeform mode, where hand landmarks are shown. To change modes, press <kbd>TAB</kbd>.
 
 - <kbd>F</kbd> - Freeform mode
+- <kbd>G</kbd> - Game mode
 - <kbd>D</kbd> - Data Collection mode
 
 In this Select mode, some visual elements can be toggled:
@@ -83,6 +84,10 @@ In this Select mode, some visual elements can be toggled:
 ### Freeform Mode
 
 In Freeform mode, raising your hand will show the predicted ASL letter, along with the confidence level as a decimal perecentage. This works for both the left and right hand, and can detect a maximum of four hands by default. Furthermore, the predictions are displayed independently per hand.
+
+### Game Mode
+
+In Game mode, a random word is displayed on the screen for the user to spell out with the ASL alphabet. The number of words are tracked, as well as the points earned by each letter spelled correctly.
 
 ### Data Collection Mode
 
