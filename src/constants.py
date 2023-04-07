@@ -1,17 +1,13 @@
 from enum import Enum, IntEnum
 from typing import Final
 
-KEY_COORDINATES_DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
-MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
-TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
-WORDS_TXT_PATH: Final[str] = "models/data/words.txt"
-
 
 class Mode(Enum):
     SELECT: Final[str] = "Select"
     FREEFORM: Final[str] = "Freeform"
-    DATA_COLLECTION: Final[str] = "Data Collection"
     GAME: Final[str] = "Game"
+    TIMED: Final[str] = "Timed"
+    DATA_COLLECTION: Final[str] = "Data Collection"
 
     def __str__(self) -> str:
         return self.value
@@ -27,6 +23,7 @@ class Key(IntEnum):
     D: Final[int] = 100
     F: Final[int] = 102
     G: Final[int] = 103
+    T: Final[int] = 116
     Z: Final[int] = 122
 
 
@@ -82,3 +79,10 @@ CLASS_LABELS: Final[list[str]] = [
     "Y",  # 24
     "Z",  # 25
 ]
+
+KEY_COORDINATES_DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
+MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
+TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
+WORDS_TXT_PATH: Final[str] = "models/data/words.txt"
+
+SPELLING_MODE: Final[set[Mode]] = {Mode.GAME, Mode.TIMED}

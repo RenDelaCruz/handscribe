@@ -16,10 +16,10 @@ RGB_MAX: Literal[255] = 255
 class Colour(Enum):
     BLACK: Final[BGR] = (0, 0, 0)
     WHITE: Final[BGR] = (255, 255, 255)
-    RED: Final[BGR] = (0, 0, 255)
+    RED: Final[BGR] = (77, 26, 250)
     ORANGE: Final[BGR] = (0, 165, 255)
     YELLOW: Final[BGR] = (44, 230, 230)
-    GREEN: Final[BGR] = (0, 255, 0)
+    GREEN: Final[BGR] = (112, 247, 32)
     TEAL: Final[BGR] = (96, 138, 18)
     CYAN: Final[BGR] = (255, 245, 141)
     CERULEAN: Final[BGR] = (150, 131, 12)
@@ -60,8 +60,8 @@ for mode, main_colour, start_colour, end_colour in (
     HAND_LANDMARK_STYLE[mode] = {
         point: DrawingSpec(
             color=next(gradient_points),
-            thickness=3,
-            circle_radius=4,
+            thickness=2,
+            circle_radius=2,
         )
         for point in LandmarkPoint
     }

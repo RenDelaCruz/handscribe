@@ -10,8 +10,16 @@ from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
+from time import time
+import datetime
 
-from src.constants import KEY_COORDINATES_DATASET_CSV_PATH, WORDS_TXT_PATH, Key, Mode
+from src.constants import (
+    KEY_COORDINATES_DATASET_CSV_PATH,
+    SPELLING_MODE,
+    WORDS_TXT_PATH,
+    Key,
+    Mode,
+)
 from src.dataclass import BoundingBox, SuccessiveLetter
 from src.key_classifier import KeyClassifier
 from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
@@ -45,8 +53,13 @@ class SignLanguageTranslator:
         self.points = 0
         self.current_word = ""
         self.letters_guessed = 0
-        self.words_guessed = 0
+        self.words_spelled = 0
         self.successive_letter: SuccessiveLetter | None = None
+
+        # Timed mode
+        self.max_time_seconds = 90
+        self.start_timestamp = 0.0
+        self.countdown_seconds = self.max_time_seconds
 
         # Set to default Freeform modes
         self.mode = Mode.FREEFORM
@@ -62,8 +75,11 @@ class SignLanguageTranslator:
     def switch_mode(self, mode: Mode) -> None:
         self.mode = mode
         match mode:
-            case Mode.GAME:
+            case Mode.GAME | Mode.TIMED:
                 self.reset_to_next_word()
+                if mode == Mode.TIMED:
+                    self.start_timestamp = int(time())
+                    self.countdown_seconds = self.max_time_seconds
             case Mode.FREEFORM | Mode.DATA_COLLECTION:
                 self.mode_box_colour = BOX_COLOUR[mode]
                 self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
@@ -122,7 +138,7 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
-                        if self.mode == Mode.GAME:
+                        if self.mode in SPELLING_MODE and self.countdown_seconds:
                             self.spell_letter(
                                 class_label=class_label, bounding_box=bounding_box
                             )
@@ -134,8 +150,10 @@ class SignLanguageTranslator:
                     else 0,
                 )
 
-                if self.mode == Mode.GAME:
+                if self.mode in SPELLING_MODE:
                     self.draw_game_words(image=image)
+                    if self.mode == Mode.TIMED:
+                        self.draw_timer(image=image)
 
                 cv2.imshow("Sign Language Alphabet Translator", image)
                 match cv2.waitKey(5) & 0xFF:
@@ -145,6 +163,8 @@ class SignLanguageTranslator:
                         self.switch_mode(Mode.FREEFORM)
                     case Key.G if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.GAME)
+                    case Key.T if self.mode == Mode.SELECT:
+                        self.switch_mode(Mode.TIMED)
                     case Key.D if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.DATA_COLLECTION)
                     case Key.One:
@@ -318,7 +338,7 @@ class SignLanguageTranslator:
             bounding_box.x
             if self.show_bounding_box
             # Centre the label if no box
-            else (bounding_box.x2 + bounding_box.x - (len(text) * 15)) // 2
+            else (bounding_box.x2 + bounding_box.x - (len(text) * 12)) // 2
         )
         point_y = bounding_box.y - (0 if self.show_bounding_box else 30)
 
@@ -339,13 +359,14 @@ class SignLanguageTranslator:
 
         if points:
             self.points += points
-            self.words_guessed += 1
+            self.words_spelled += 1
         else:
             self.points = 0
-            self.words_guessed = 0
+            self.words_spelled = 0
 
     def get_random_word(self) -> str:
-        return random.choice(words).upper()
+        word = random.choice(words).upper()
+        return word if word[0] != self.current_word[-1:] else self.get_random_word()
 
     def spell_letter(self, class_label: str, bounding_box: BoundingBox) -> None:
         word_length = len(self.current_word)
@@ -396,11 +417,42 @@ class SignLanguageTranslator:
                 ),
                 font_scale=font_scale,
                 font_thickness=font_thickness,
-                text_colour=Colour.GREEN
+                text_colour=(
+                    Colour.RED
+                    if self.countdown_seconds == 0
+                    else Colour.ORANGE
+                    if self.countdown_seconds < 15
+                    else Colour.YELLOW
+                    if self.countdown_seconds < 30
+                    else Colour.GREEN
+                )
                 if self.letters_guessed > index
                 else Colour.WHITE,
             )
             x_position += text_width + 10
+
+    def draw_timer(self, image: np.ndarray) -> None:
+        if self.countdown_seconds:
+            elapsed_time_seconds = int(time() - self.start_timestamp)
+            self.countdown_seconds = max(
+                self.max_time_seconds - elapsed_time_seconds, 0
+            )
+
+        timer = datetime.timedelta(seconds=self.countdown_seconds)
+        self.draw_text(
+            image=image,
+            text=str(timer)[2:],
+            position=(25, 135),
+            font_scale=0.75,
+            font_thickness=2,
+            text_colour=Colour.RED
+            if self.countdown_seconds == 0
+            else Colour.ORANGE
+            if self.countdown_seconds < 15
+            else Colour.YELLOW
+            if self.countdown_seconds < 30
+            else Colour.WHITE,
+        )
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
         messages: tuple[str, ...]
@@ -410,19 +462,20 @@ class SignLanguageTranslator:
                     "Select Mode",
                     "[F] Freeform",
                     "[G] Game",
+                    "[T] Timed",
                     "[D] Data Collection",
                     "[1] Toggle Landmarks",
                     "[2] Toggle Bounding Box",
                 )
-            case Mode.GAME:
+            case Mode.GAME | Mode.TIMED:
                 messages = (
                     f"{self.mode} Mode",
-                    f"Words Guessed: {self.words_guessed}",
+                    f"Words Spelled: {self.words_spelled}",
                     f"Points: {self.points}",
                 )
             case Mode.DATA_COLLECTION:
                 messages = (
-                    f"{self.mode} Mode",
+                    f"Data Collection Mode",
                     f"Saved Key: {self.pressed_key}"
                     if self.pressed_key
                     else "Press a key to save data",

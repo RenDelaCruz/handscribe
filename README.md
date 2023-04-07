@@ -74,6 +74,7 @@ The application starts in Freeform mode, where hand landmarks are shown. To chan
 
 - <kbd>F</kbd> - Freeform mode
 - <kbd>G</kbd> - Game mode
+- <kbd>T</kbd> - Timed mode
 - <kbd>D</kbd> - Data Collection mode
 
 Some visual elements can be toggled at any time:
@@ -88,6 +89,10 @@ In Freeform mode, raising your hand will show the predicted ASL letter, along wi
 ### Game Mode
 
 In Game mode, a random word is displayed on the screen for the user to spell out with the ASL alphabet. The number of words are tracked, as well as the points earned by each letter spelled correctly.
+
+### Timed Mode
+
+This mode is the same as Game mode, except the user has only 90 seconds to spell as many words as possible. A countdown timer is also displayed.
 
 ### Data Collection Mode
 
