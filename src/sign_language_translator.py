@@ -147,9 +147,9 @@ class SignLanguageTranslator:
                         self.switch_mode(Mode.GAME)
                     case Key.D if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.DATA_COLLECTION)
-                    case Key.One if self.mode == Mode.SELECT:
+                    case Key.One:
                         self.show_landmarks ^= True
-                    case Key.Two if self.mode == Mode.SELECT:
+                    case Key.Two:
                         self.show_bounding_box ^= True
                     case key if (
                         Key.A <= key <= Key.Z

@@ -76,7 +76,7 @@ The application starts in Freeform mode, where hand landmarks are shown. To chan
 - <kbd>G</kbd> - Game mode
 - <kbd>D</kbd> - Data Collection mode
 
-In this Select mode, some visual elements can be toggled:
+Some visual elements can be toggled at any time:
 
 - Press <kbd>1</kbd> to toggle the hand landmarks shown on the screen.
 - Press <kbd>2</kbd> to toggle the bounding box.
@@ -100,12 +100,12 @@ The current supervised machine learning model was trained on a dataset of flatte
 
 ### Learning
 
-To re-train the model based on new data points in `models/data/key_coordinates.csv`, run `make learn`
+To re-train the model based on new data points in `models/data/key_coordinates.csv`, run `make learn`.
 
 
 ### Model Summary
 
-The model summary of the current model is outlined below.
+The model summary of the current model is outlined below. The data points were normalized and flattened before being inputted into the sequential neural network.
 
 ```sh
 Model: "sequential"
