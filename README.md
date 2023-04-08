@@ -92,7 +92,7 @@ In Game mode, a random word is displayed on the screen for the user to spell out
 
 ### Timed Mode
 
-This mode is the same as Game mode, except the user has only 90 seconds to spell as many words as possible. A countdown timer is also displayed.
+This mode is the same as Game mode, except the user has only 60 seconds to spell as many words as possible. A countdown timer is also displayed.
 
 ### Data Collection Mode
 
