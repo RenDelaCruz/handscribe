@@ -417,14 +417,8 @@ class SignLanguageTranslator:
                 ),
                 font_scale=font_scale,
                 font_thickness=font_thickness,
-                text_colour=(
-                    Colour.RED
-                    if self.countdown_seconds == 0
-                    else Colour.ORANGE
-                    if self.countdown_seconds < 10
-                    else Colour.YELLOW
-                    if self.countdown_seconds < 20
-                    else Colour.GREEN
+                text_colour=self.get_text_colour_based_on_countdown(
+                    default_colour=Colour.GREEN
                 )
                 if self.letters_guessed > index
                 else Colour.RED
@@ -447,13 +441,20 @@ class SignLanguageTranslator:
             position=(25, 135),
             font_scale=0.75,
             font_thickness=2,
-            text_colour=Colour.RED
+            text_colour=self.get_text_colour_based_on_countdown(
+                default_colour=Colour.WHITE
+            ),
+        )
+
+    def get_text_colour_based_on_countdown(self, default_colour: Colour) -> Colour:
+        return (
+            Colour.RED
             if self.countdown_seconds == 0
             else Colour.ORANGE
             if self.countdown_seconds < 10
             else Colour.YELLOW
             if self.countdown_seconds < 20
-            else Colour.WHITE,
+            else default_colour
         )
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
