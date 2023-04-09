@@ -14,8 +14,8 @@ from time import time
 import datetime
 
 from src.constants import (
+    CLASS_LABELS,
     KEY_COORDINATES_DATASET_CSV_PATH,
-    SPELLING_MODE,
     WORDS_TXT_PATH,
     Key,
     Mode,
@@ -49,17 +49,17 @@ class SignLanguageTranslator:
         # Data Collection mode
         self.pressed_key: str | None = None
 
-        # Game mode
+        # Game and Alphabet mode
         self.points = 0
         self.current_word = ""
-        self.letters_guessed = 0
+        self.letters_spelled = 0
         self.words_spelled = 0
         self.successive_letter: SuccessiveLetter | None = None
 
         # Timed mode
         self.max_time_seconds = 60
         self.start_timestamp = 0.0
-        self.countdown_seconds = self.max_time_seconds
+        self.timer_seconds = self.max_time_seconds
 
         # Set to default Freeform modes
         self.mode = Mode.FREEFORM
@@ -75,11 +75,13 @@ class SignLanguageTranslator:
     def switch_mode(self, mode: Mode) -> None:
         self.mode = mode
         match mode:
-            case Mode.GAME | Mode.TIMED:
-                self.reset_to_next_word()
-                if mode == Mode.TIMED:
+            case Mode.GAME | Mode.TIMED | Mode.ALPHABET:
+                self.reset_to_next_word(
+                    word="".join(CLASS_LABELS) if mode == Mode.ALPHABET else None
+                )
+                if mode in (Mode.TIMED, Mode.ALPHABET):
                     self.start_timestamp = int(time())
-                    self.countdown_seconds = self.max_time_seconds
+                    self.timer_seconds = self.max_time_seconds
             case Mode.FREEFORM | Mode.DATA_COLLECTION:
                 self.mode_box_colour = BOX_COLOUR[mode]
                 self.mode_landmark_style = HAND_LANDMARK_STYLE[mode]
@@ -138,7 +140,11 @@ class SignLanguageTranslator:
                             bounding_box=bounding_box,
                         )
 
-                        if self.mode in SPELLING_MODE and self.countdown_seconds:
+                        if (
+                            (self.mode == Mode.ALPHABET and self.letters_spelled < 26)
+                            or (self.mode == Mode.TIMED and self.timer_seconds)
+                            or self.mode == Mode.GAME
+                        ):
                             self.spell_letter(
                                 class_label=class_label, bounding_box=bounding_box
                             )
@@ -150,9 +156,9 @@ class SignLanguageTranslator:
                     else 0,
                 )
 
-                if self.mode in SPELLING_MODE:
+                if self.mode in (Mode.GAME, Mode.TIMED, Mode.ALPHABET):
                     self.draw_game_words(image=image)
-                    if self.mode == Mode.TIMED:
+                    if self.mode != Mode.GAME:
                         self.draw_timer(image=image)
 
                 cv2.imshow("Sign Language Alphabet Translator", image)
@@ -161,6 +167,8 @@ class SignLanguageTranslator:
                         self.mode = Mode.SELECT
                     case Key.F if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.FREEFORM)
+                    case Key.A if self.mode == Mode.SELECT:
+                        self.switch_mode(Mode.ALPHABET)
                     case Key.G if self.mode == Mode.SELECT:
                         self.switch_mode(Mode.GAME)
                     case Key.T if self.mode == Mode.SELECT:
@@ -353,9 +361,10 @@ class SignLanguageTranslator:
             thin=True,
         )
 
-    def reset_to_next_word(self, points: int = 0) -> None:
-        self.current_word = self.get_random_word()
-        self.letters_guessed = 0
+    def reset_to_next_word(self, points: int = 0, word: str | None = None) -> None:
+        self.current_word = word or self.get_random_word()
+        self.letters_spelled = 0
+        self.successive_letter = None
 
         if points:
             self.points += points
@@ -370,19 +379,21 @@ class SignLanguageTranslator:
 
     def spell_letter(self, class_label: str, bounding_box: BoundingBox) -> None:
         word_length = len(self.current_word)
-        if self.letters_guessed == word_length:
+        if self.letters_spelled == word_length:
             self.reset_to_next_word(points=word_length)
-        elif class_label == self.current_word[self.letters_guessed]:
+        elif class_label == self.current_word[self.letters_spelled]:
             is_next_letter_the_same = (
-                self.letters_guessed + 1 < word_length
-                and self.current_word[self.letters_guessed]
-                == self.current_word[self.letters_guessed + 1]
+                self.letters_spelled + 1 < word_length
+                and self.current_word[self.letters_spelled]
+                == self.current_word[self.letters_spelled + 1]
             )
 
             if not self.successive_letter:
-                self.letters_guessed += 1
+                self.letters_spelled += 1
 
-                if is_next_letter_the_same:
+                if self.mode == Mode.ALPHABET:
+                    self.points += 1
+                elif is_next_letter_the_same:
                     width = bounding_box.x2 - bounding_box.x
                     centre_x = bounding_box.x + width // 2
                     self.successive_letter = SuccessiveLetter(
@@ -392,15 +403,23 @@ class SignLanguageTranslator:
                 bounding_box.x2 > self.successive_letter.right_margin
                 or bounding_box.x < self.successive_letter.left_margin
             ):
-                self.letters_guessed += 1
+                self.letters_spelled += 1
                 self.successive_letter = None
 
     def draw_game_words(self, image: np.ndarray) -> None:
+        match self.mode:
+            case Mode.ALPHABET:
+                start = min(max(self.letters_spelled - 2, 0), 21)
+                current_word = self.current_word[start : start + 5]
+            case _:
+                current_word = self.current_word
+                start = 0
+
         x_position = 25
         font_scale = 3
         font_thickness = 8
 
-        for index, letter in enumerate(self.current_word):
+        for index, letter in enumerate(current_word, start=start):
             text_size, _ = cv2.getTextSize(
                 text=letter,
                 fontFace=cv2.FONT_HERSHEY_SIMPLEX,
@@ -417,44 +436,57 @@ class SignLanguageTranslator:
                 ),
                 font_scale=font_scale,
                 font_thickness=font_thickness,
-                text_colour=self.get_text_colour_based_on_countdown(
-                    default_colour=Colour.GREEN
-                )
-                if self.letters_guessed > index
-                else Colour.RED
-                if self.countdown_seconds == 0 and self.letters_guessed == 0
-                else Colour.WHITE,
+                text_colour=self.get_text_colour_based_on_countdown(index=index),
             )
             x_position += text_width + 10
 
     def draw_timer(self, image: np.ndarray) -> None:
-        if self.countdown_seconds:
-            elapsed_time_seconds = int(time() - self.start_timestamp)
-            self.countdown_seconds = max(
-                self.max_time_seconds - elapsed_time_seconds, 0
-            )
+        match self.mode:
+            # Count down
+            case Mode.TIMED:
+                elapsed_time_seconds = int(time() - self.start_timestamp)
+                self.timer_seconds = max(
+                    self.max_time_seconds - elapsed_time_seconds, 0
+                )
+            # Count up
+            case Mode.ALPHABET:
+                if self.letters_spelled < 26:
+                    self.timer_seconds = int(time() - self.start_timestamp)
 
-        timer = datetime.timedelta(seconds=self.countdown_seconds)
+        timer = datetime.timedelta(seconds=self.timer_seconds)
         self.draw_text(
             image=image,
             text=str(timer)[2:],
             position=(25, 135),
             font_scale=0.75,
             font_thickness=2,
-            text_colour=self.get_text_colour_based_on_countdown(
-                default_colour=Colour.WHITE
-            ),
+            text_colour=self.get_text_colour_based_on_countdown(),
         )
 
-    def get_text_colour_based_on_countdown(self, default_colour: Colour) -> Colour:
+    def get_text_colour_based_on_countdown(self, index: int | None = None) -> Colour:
+        if self.mode in (Mode.ALPHABET, Mode.GAME):
+            return (
+                Colour.GREEN
+                if (index is not None and self.letters_spelled > index)
+                or (self.letters_spelled == 26 and self.mode == Mode.ALPHABET)
+                else Colour.WHITE
+            )
+
+        if self.timer_seconds == 0 and (index is None or self.letters_spelled == 0):
+            return Colour.RED
+
         return (
-            Colour.RED
-            if self.countdown_seconds == 0
-            else Colour.ORANGE
-            if self.countdown_seconds < 10
-            else Colour.YELLOW
-            if self.countdown_seconds < 20
-            else default_colour
+            (
+                Colour.RED
+                if self.timer_seconds == 0
+                else Colour.ORANGE
+                if self.timer_seconds < 10
+                else Colour.YELLOW
+                if self.timer_seconds < 20
+                else Colour.GREEN
+            )
+            if index is not None and self.letters_spelled > index
+            else Colour.WHITE
         )
 
     def draw_metrics(self, image: np.ndarray, num_hands: int) -> None:
@@ -464,16 +496,20 @@ class SignLanguageTranslator:
                 messages = (
                     "Select Mode",
                     "[F] Freeform",
+                    "[A] Alphabet",
                     "[G] Game",
                     "[T] Timed",
                     "[D] Data Collection",
                     "[1] Toggle Landmarks",
                     "[2] Toggle Bounding Box",
                 )
-            case Mode.GAME | Mode.TIMED:
+            case Mode.GAME | Mode.TIMED | Mode.ALPHABET:
                 messages = (
                     f"{self.mode} Mode",
-                    f"Words Spelled: {self.words_spelled}",
+                    f"Current Letter: "
+                    + f"{self.current_word[min(self.letters_spelled, 25)]}"
+                    if self.mode == Mode.ALPHABET
+                    else f"Words Spelled: {self.words_spelled}",
                     f"Points: {self.points}",
                 )
             case Mode.DATA_COLLECTION:

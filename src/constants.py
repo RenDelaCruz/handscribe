@@ -5,6 +5,7 @@ from typing import Final
 class Mode(Enum):
     SELECT: Final[str] = "Select"
     FREEFORM: Final[str] = "Freeform"
+    ALPHABET: Final[str] = "Alphabet"
     GAME: Final[str] = "Game"
     TIMED: Final[str] = "Timed"
     DATA_COLLECTION: Final[str] = "Data Collection"
@@ -84,5 +85,3 @@ KEY_COORDINATES_DATASET_CSV_PATH: Final[str] = "models/data/key_coordinates.csv"
 MODEL_SAVE_PATH: Final[str] = "models/key_classifier.hdf5"
 TFLITE_SAVE_PATH: Final[str] = "models/key_classifier.tflite"
 WORDS_TXT_PATH: Final[str] = "models/data/words.txt"
-
-SPELLING_MODE: Final[set[Mode]] = {Mode.GAME, Mode.TIMED}
