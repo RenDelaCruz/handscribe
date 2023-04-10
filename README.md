@@ -86,13 +86,17 @@ Some visual elements can be toggled at any time:
 
 In Freeform mode, raising your hand will show the predicted ASL letter, along with the confidence level as a decimal perecentage. This works for both the left and right hand, and can detect a maximum of four hands by default. Furthermore, the predictions are displayed independently per hand.
 
+### Alphabet Mode
+
+In this mode, the user can practice fingerspelling the alphabet in sequential order. There is also a timer that counts up and stops when the user reaches the final letter. This way, previous attempts can be compared to the current one.
+
 ### Game Mode
 
 In Game mode, a random word is displayed on the screen for the user to spell out with the ASL alphabet. The number of words are tracked, as well as the points earned by each letter spelled correctly.
 
 ### Timed Mode
 
-This mode is the same as Game mode, except the user has only 60 seconds to spell as many words as possible. A countdown timer is also displayed.
+This mode is the same as Game mode, except the user has only 30 seconds to spell as many words as possible. A countdown timer is also displayed.
 
 ### Data Collection Mode
 

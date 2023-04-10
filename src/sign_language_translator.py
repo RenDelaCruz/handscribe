@@ -57,7 +57,7 @@ class SignLanguageTranslator:
         self.successive_letter: SuccessiveLetter | None = None
 
         # Timed mode
-        self.max_time_seconds = 60
+        self.max_time_seconds = 30
         self.start_timestamp = 0.0
         self.timer_seconds = self.max_time_seconds
 
@@ -480,9 +480,9 @@ class SignLanguageTranslator:
                 Colour.RED
                 if self.timer_seconds == 0
                 else Colour.ORANGE
-                if self.timer_seconds < 10
+                if self.timer_seconds < 5
                 else Colour.YELLOW
-                if self.timer_seconds < 20
+                if self.timer_seconds < 10
                 else Colour.GREEN
             )
             if index is not None and self.letters_spelled > index
