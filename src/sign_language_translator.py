@@ -13,16 +13,16 @@ from mediapipe.python.solutions import hands as mp_hands
 from time import time
 import datetime
 
-from src.constants import (
+from src.core.constants import (
     CLASS_LABELS,
     KEY_COORDINATES_DATASET_CSV_PATH,
     WORDS_TXT_PATH,
     Key,
     Mode,
 )
-from src.dataclass import BoundingBox, SuccessiveLetter
-from src.key_classifier import KeyClassifier
-from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
+from src.core.dataclass import BoundingBox, SuccessiveLetter
+from src.machine_learning.key_classifier import KeyClassifier
+from src.core.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
 
 with open(WORDS_TXT_PATH, "r") as f:
     words = f.read().split("\n")

@@ -5,7 +5,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from src import _
-from src.constants import (
+from src.core.constants import (
     KEY_COORDINATES_DATASET_CSV_PATH,
     MODEL_SAVE_PATH,
     TFLITE_SAVE_PATH,

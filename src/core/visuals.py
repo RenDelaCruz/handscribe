@@ -6,7 +6,7 @@ from typing import Final, Iterator, Literal, TypeAlias
 from colour import Color, color_scale
 from mediapipe.python.solutions.drawing_styles import DrawingSpec
 
-from src.constants import LandmarkPoint, Mode
+from src.core.constants import LandmarkPoint, Mode
 
 BGR: TypeAlias = tuple[int, int, int]
 RGB: TypeAlias = tuple[float, float, float]

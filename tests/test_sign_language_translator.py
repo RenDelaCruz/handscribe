@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 
-from src.constants import Mode
-from src.dataclass import BoundingBox
+from src.core.constants import Mode
+from src.core.dataclass import BoundingBox
+from src.core.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE
 from src.sign_language_translator import SignLanguageTranslator
-from src.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE
 
 
 @patch("src.sign_language_translator.SignLanguageTranslator.capture_video")
