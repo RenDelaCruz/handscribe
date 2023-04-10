@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from src.core.constants import CLASS_LABELS, TFLITE_SAVE_PATH
+from src.base.constants import CLASS_LABELS, TFLITE_SAVE_PATH
 
 
 class KeyClassifier:

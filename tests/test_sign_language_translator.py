@@ -3,9 +3,9 @@ from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 
-from src.core.constants import Mode
-from src.core.dataclass import BoundingBox
-from src.core.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE
+from src.base.constants import Mode
+from src.base.dataclass import BoundingBox
+from src.base.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE
 from src.sign_language_translator import SignLanguageTranslator
 
 

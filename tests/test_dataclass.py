@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.core.dataclass import SuccessiveLetter
+from src.base.dataclass import SuccessiveLetter
 
 
 class SuccessiveLetterTests(TestCase):

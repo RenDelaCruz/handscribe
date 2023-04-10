@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from src.machine_learning.key_classifier import KeyClassifier
+from src.neural_network.key_classifier import KeyClassifier
 
 
 class ProcessTests(TestCase):

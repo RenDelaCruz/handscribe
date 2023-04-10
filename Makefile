@@ -15,7 +15,7 @@ init:
 ## Runs the training script to build the classifier model
 .PHONY: learn
 learn:
-	poetry run python3 -m src.machine_learning.key_train
+	poetry run python3 -m src.neural_network.key_train
 
 ## Formats the code using black
 .PHONY: format
