@@ -22,6 +22,9 @@
   - [Quitting](#quitting)
 - [Modes](#modes)
   - [Freeform Mode](#freeform-mode)
+  - [Alphabet Mode](#alphabet-mode)
+  - [Game Mode](#game-mode)
+  - [Timed Mode](#timed-mode)
   - [Data Collection Mode](#data-collection-mode)
 - [Machine Learning Model](#machine-learning-model)
   - [Learning](#learning)
@@ -73,6 +76,7 @@ $ pip install poetry
 The application starts in Freeform mode, where hand landmarks are shown. To change modes, press <kbd>TAB</kbd>.
 
 - <kbd>F</kbd> - Freeform mode
+- <kbd>A</kbd> - Alphabet mode
 - <kbd>G</kbd> - Game mode
 - <kbd>T</kbd> - Timed mode
 - <kbd>D</kbd> - Data Collection mode
