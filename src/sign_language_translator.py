@@ -57,7 +57,7 @@ class SignLanguageTranslator:
         self.successive_letter: SuccessiveLetter | None = None
 
         # Timed mode
-        self.max_time_seconds = 30
+        self.max_time_seconds = 40
         self.start_timestamp = 0.0
         self.timer_seconds = self.max_time_seconds
 
