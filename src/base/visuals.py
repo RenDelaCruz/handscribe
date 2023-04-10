@@ -60,8 +60,8 @@ for mode, main_colour, start_colour, end_colour in (
     HAND_LANDMARK_STYLE[mode] = {
         point: DrawingSpec(
             color=next(gradient_points),
-            thickness=2,
-            circle_radius=2,
+            thickness=3,
+            circle_radius=4,
         )
         for point in LandmarkPoint
     }

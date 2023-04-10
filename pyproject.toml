@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "sign-language-ai-translator"
+name = "handscribe"
 version = "0.1.0"
 description = ""
 authors = ["Ren de la Cruz <ren_delacruz@outlook.com>"]
 readme = "README.md"
-packages = [{include = "sign_language_ai_translator"}]
+packages = [{include = "handscribe"}]
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.12"
