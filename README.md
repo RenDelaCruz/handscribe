@@ -7,7 +7,10 @@
 [![ruff](https://img.shields.io/badge/linter-ruff-red.svg)](https://pypi.org/project/ruff/)
 
 
-# **Handscribe**:<br> The Sign Language Alphabet Translator  <!-- omit from toc -->
+![Handscribe](docs/assets/logo.png)
+
+# **Handscribe**: The Sign Language Alphabet Translator  <!-- omit from toc -->
+
 
 ![Demo](docs/assets/demo.gif)
 
