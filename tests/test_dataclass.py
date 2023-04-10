@@ -18,7 +18,7 @@ class SuccessiveLetterTests(TestCase):
 
     def test__returns_right_margin(self) -> None:
         # when
-        result = self.successive_letter.left_margin
+        result = self.successive_letter.right_margin
 
         # then
         self.assertEqual(result, self.centre_x + self.width)
