@@ -7,9 +7,9 @@
 [![ruff](https://img.shields.io/badge/linter-ruff-red.svg)](https://pypi.org/project/ruff/)
 
 
-![Handscribe](docs/assets/logo-border-circles.png)
+![Handscribe](docs/logo/logo-circles.svg)
 
-# **Handscribe**: The Sign Language Alphabet Translator  <!-- omit from toc -->
+# **HandScribe**: The Sign Language Alphabet Translator  <!-- omit from toc -->
 
 
 ![Demo](docs/assets/demo.gif)
@@ -101,6 +101,8 @@ In this mode, the user can practice fingerspelling the alphabet in sequential or
 
 In Game mode, a random word is displayed on the screen for the user to spell out with the ASL alphabet. The number of words are tracked, as well as the points earned by each letter spelled correctly.
 
+> **NOTE**: For double letters, the hand sign has to slide horizontally, as it is done in actual ASL.
+
 ### Timed Mode
 
 This mode is the same as Game mode, except the user has only 40 seconds to spell as many words as possible. A countdown timer is also displayed.
@@ -158,3 +160,5 @@ Specific test directories, files, or cases can be run with `make test path.to.Te
 **Capstone Project**  
 CS 4ZP6 · Group 24  
 Ren de la Cruz (400051394)
+
+[Poster PDF](docs/poster.pdf)
