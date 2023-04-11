@@ -159,6 +159,8 @@ Specific test directories, files, or cases can be run with `make test path.to.Te
 
 ----
 
+![ASL Alphabet](docs/assets/asl-alphabet.png)
+
 **Capstone Project**  
 CS 4ZP6 · Group 24  
 Ren de la Cruz (400051394)
