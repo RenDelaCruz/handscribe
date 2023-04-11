@@ -150,6 +150,8 @@ Non-trainable params: 0
 __________________________________________________________________________
 ```
 
+![ML Info](docs/assets/ml-info.png)
+
 ## Unit Testing
 
 Run `make test` to run the unit test suite.
