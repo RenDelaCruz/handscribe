@@ -40,7 +40,7 @@
 
 American Sign Language (ASL) serves as the main sign language of the deaf community in North America. In the language, words and grammar are composed of a combination of hand signals and facial expressions to convey sentences. However, for words without a sign, such as names and loanwords, there exists ASL fingerspelling, where English letters can be individually represented with a hand sign.
 
-![Fingerspelling Chart](docs/assets/fingerspelling-chart.png)
+![ASL Alphabet](docs/assets/asl-alphabet.png)
 
 For learners of ASL, it may be difficult to find someone from the deaf community to interact with. As such, it is often a challenge receiving adequate practice and feedback, even for something as simple as fingerspelling.
 
@@ -158,8 +158,6 @@ Specific test directories, files, or cases can be run with `make test path.to.Te
 
 
 ----
-
-![ASL Alphabet](docs/assets/asl-alphabet.png)
 
 **Capstone Project**  
 CS 4ZP6 · Group 24  
