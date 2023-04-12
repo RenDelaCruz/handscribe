@@ -127,7 +127,7 @@ To re-train the model based on new data points in `models/data/key_coordinates.c
 
 ### Model Summary
 
-The model summary of the current model is outlined below. The data points were normalized and flattened before being inputted into the sequential neural network.
+The model summary of the current model is outlined below. The data points were normalized and flattened before being inputted into the fully-connected, multilayer perceptron neural network.
 
 ```sh
 Model: "sequential"
