@@ -1,7 +1,9 @@
 import csv
+import datetime
 import itertools
-from contextlib import suppress
 import random
+from contextlib import suppress
+from time import time
 from typing import Literal
 
 import cv2
@@ -10,8 +12,6 @@ from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
 from mediapipe.framework.formats.landmark_pb2 import NormalizedLandmarkList
 from mediapipe.python.solutions import drawing_utils as mp_drawing
 from mediapipe.python.solutions import hands as mp_hands
-from time import time
-import datetime
 
 from src.base.constants import (
     CLASS_LABELS,
@@ -21,8 +21,8 @@ from src.base.constants import (
     Mode,
 )
 from src.base.dataclass import BoundingBox, SuccessiveLetter
-from src.neural_network.key_classifier import KeyClassifier
 from src.base.visuals import BOX_COLOUR, HAND_LANDMARK_STYLE, Colour
+from src.neural_network.key_classifier import KeyClassifier
 
 with open(WORDS_TXT_PATH, "r") as f:
     words = f.read().split("\n")

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Ren de la Cruz <ren_delacruz@outlook.com>"]
 readme = "README.md"
-packages = [{include = "handscribe"}]
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10, <3.12"
@@ -17,7 +17,7 @@ scikit-learn = "^1.2.2"
 termcolor = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
-black = {version = "^23.1a1", allow-prereleases = true}
+black = { version = "^23.1a1", allow-prereleases = true }
 mypy = "^0.991"
 ruff = "^0.0.236"
 
@@ -39,6 +39,23 @@ exclude = "tests"
 
 [tool.ruff]
 target-version = "py310"
-select = ["A", "B", "C", "F", "I", "E", "W", "N", "UP", "RUF", "PTH", "ARG", "TID", "SIM", "PIE", "DTZ"]
+select = [
+    "A",
+    "B",
+    "C",
+    "F",
+    "I",
+    "E",
+    "W",
+    "N",
+    "UP",
+    "RUF",
+    "PTH",
+    "ARG",
+    "TID",
+    "SIM",
+    "PIE",
+    "DTZ",
+]
 ignore = ["E999"]
 fixable = ["I", "UP", "W", "F"]
